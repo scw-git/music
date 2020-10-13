@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+</body>
+<script>
+    let obj = {
+
+    }
+
+    Object.defineProperty(obj, 'name', {
+        get() { //获取obj的时候，会调用
+            return 23
+        },
+        set(val) { //给属性赋值,更新时，调用
+            console.log(val);
+
+        }
+    })
+    obj.name = 12
+</script>
+
+</html>
