@@ -10,6 +10,7 @@
 * 相似mv
 * 搜索详情
 * 自动播放
+* 歌曲详情页
 ## 项目效果展示
 ### 首页
 ![](https://github.com/scw-git/music/blob/master/img/%E9%A6%96%E9%A1%B5.png)
@@ -23,6 +24,6 @@
 ![](https://github.com/scw-git/music/blob/master/img/mv.png)
 ### 搜索页面
 ![](https://github.com/scw-git/music/blob/master/img/%E6%90%9C%E7%B4%A2.png)
-### 歌单评论
-![](### 搜索页面
-![](https://github.com/scw-git/music/blob/master/img/%E6%90%9C%E7%B4%A2.png))
+### 歌曲详情页
+![](https://github.com/scw-git/music/blob/master/img/%E6%AD%8C%E6%9B%B2%E8%AF%A6%E6%83%85%E9%A1%B5.png)
+
