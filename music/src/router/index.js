@@ -6,7 +6,7 @@ import NewMusic from '../components/NewMusic.vue'
 import NewMv from '../components/NewMv.vue'
 import SearchResult from '../components/SearchResult.vue'
 import DetailPlayList from '../components/DetailPlayList.vue'
-import DetailMv from '../components/DetailMv.vue'
+// import DetailMv from '../components/DetailMv.vue'
 import SongDetail from '../components/SongDetail.vue'
 
 Vue.use(VueRouter)
@@ -37,7 +37,8 @@ const routes = [{
         component: DetailPlayList
     }, {
         path: '/DetailMv',
-        component: DetailMv
+        component: () =>
+            import ('../components/DetailMv.vue')
     }, {
         path: '/SongDetail',
         component: SongDetail

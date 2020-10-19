@@ -58,55 +58,8 @@
                     <textarea name="" id=""></textarea>
                     <button>评论</button>
                 </div>
-                <div class="comment-wrap ">
-                    <p>精彩评论</p>
-                    <div class="comments-wrap" v-for="(item,i) in hotComment" :key="i">
-                        <!--头像-->
-                        <img :src="item.user.avatarUrl" alt="">
-                        <div class="content-wrap">
-                            <!--评论-->
-                            <div class="content">
-                                <span>{{item.user.nickname}}: </span>
-                                <span>{{item.content}}</span>
-                            </div>
-                            <!--回复评论  注意：一定要先判断是否存在在填数据，否则填对了也不显示-->
-                            <div class="re-content" v-if="item.beReplied.length!=0">
-                                <span>{{item.beReplied[0].user.nickname}}：</span>
-                                <span>{{item.beReplied[0].content}}</span>
-                            </div>
-                            <!--时间-->
-                            <span class="time">{{item.time |formatTime}}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="comment-wrap newComment">
-                    <p>最新评论({{this.total}})</p>
-                    <div class="comments-wrap" v-for="(item,i) in newComment" :key="i">
-                        <!--头像-->
-                        <img :src="item.user.avatarUrl" alt="">
-                        <div class="content-wrap">
-                            <!--评论-->
-                            <div class="content">
-                                <span>{{item.user.nickname}}: </span>
-                                <span>{{item.content}}</span>
-                            </div>
-                            <!--回复评论  注意：一定要先判断是否存在在填数据，否则填对了也不显示-->
-                            <div class="re-content" v-if="item.beReplied.length!=0">
-                                <span>{{item.beReplied[0].user.nickname}}：</span>
-                                <span>{{item.beReplied[0].content}}</span>
-                            </div>
-                            <!--时间-->
-                            <span class="time">{{item.time |formatTime}}</span>
-                        </div>
-                    </div>
-                </div>
-                <!--分页器-->
-                <div class="fy">
-                    <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
-                    </el-pagination>
-                </div>
-
+                <!--$event可以直接获取值，并赋值给data中的变量，不用绑定一个方法-->
+                <comment :id="id" url='/comment/playlist' @total="total=$event" />
             </el-tab-pane>
 
         </el-tabs>
@@ -115,7 +68,12 @@
 </template>
 
 <script>
+import comment from './common/comment'
+
 export default {
+    components: {
+        comment
+    },
     data() {
         return {
             playlistdetail: '', //歌单详情内容
@@ -125,24 +83,20 @@ export default {
             allid: '',
             songs: [], //歌单所有的歌
             isShow: true, //用来显示与隐藏简介的
-            newComment: [], //最新评论
-            hotComment: [], //热门评论
-            total: 0, //所有评论数
-            limit: 20, //最新评论的没页多少条数据
-            page: 1,
             index: -1, //不能一开始就是0，会把第一个变成红色。用来记录当前播放歌曲的索引号，以便把它变成红色
-
+            id: this.$route.query.playListId,
+            total: 11111
         }
     },
     methods: {
         handleCurrentChange(val) {
             // console.log(`当前页: ${val}`);
             this.page = val
-            this.getComment()
+
         },
         //把歌曲id传到父组件中
         play(id, i) {
-            this.index = i//如果不加这个，第一个点击的不会变红
+            this.index = i //如果不加这个，第一个点击的不会变红
             this.$axios.get('/song/url?id=' + id).then(res => {
                 this.$parent.url = res.data.data[0].url
                 this.$parent.currentId = id
@@ -155,23 +109,7 @@ export default {
         playAll() {
             this.play(this.arrid[0], 0)
         },
-        //获取歌单评论
-        getComment() {
-            this.$axios({
-                method: 'get',
-                url: '/comment/playlist',
-                params: {
-                    id: this.$route.query.playListId,
-                    limit: this.limit,
-                    offset: (this.page - 1) * this.limit
-                }
-            }).then(res => {
-                this.newComment = res.data.comments
-                this.hotComment = res.data.hotComments
-                this.total = res.data.total
-                // console.log(res)
-            })
-        },
+
         //  跳转到mv详情
         toDetailMv(id) {
             this.$router.push({
@@ -183,12 +121,12 @@ export default {
         },
     },
     mounted() {
-        this.$index.$on('index', (res) => { //接收一个函数，res中保存传过来的值
+        this.$vue.$on('index', (res) => { //接收一个函数，res中保存传过来的值
             this.index = res
         })
     },
     created() {
-        this.$axios.get('/playlist/detail?id=' + this.$route.query.playListId)
+        this.$axios.get('/playlist/detail?id=' + this.id)
             .then(res => {
                 this.playlistdetail = res.data.playlist //歌单详情内容
                 // console.log(res)
@@ -202,28 +140,12 @@ export default {
                     // console.log(this.songs)
                 })
                 // console.log(this.arrid)
-            }),
-            this.getComment()
+            })
     }
 }
 </script>
 
 <style>
-.comment>>>.el-pagination.is-background .el-pager li:not(.disabled) {
-    background-color: rgb(244, 244, 245);
-    color: rgb(0, 0, 0);
-}
-
-.comment>>>.el-pagination.is-background .el-pager li:not(.disabled).active {
-    background-color: rgb(230, 175, 23);
-    color: white;
-}
-
-.comment>>>.el-pagination.is-background .el-pager li:not(.disabled):hover {
-    color: rgb(255, 189, 7);
-
-}
-
 .addComment {
     position: relative;
     padding: 15px 10px 44px;
@@ -252,54 +174,6 @@ export default {
     outline: none;
     cursor: pointer;
     border-radius: 5px;
-}
-
-.comment-wrap {
-    margin-top: 30px;
-}
-
-.newComment {
-    margin-top: 50px;
-}
-
-.comments-wrap {
-    display: flex;
-    margin-top: 10px;
-    font-size: 0.9rem;
-    border-bottom: 1px solid #efefef;
-    padding: 15px 0;
-}
-
-.comments-wrap img {
-    height: 40px;
-    border-radius: 20px;
-}
-
-.content-wrap {
-    flex: 1;
-    margin-left: 15px;
-}
-
-.content-wrap .content span:first-child,
-.content-wrap .re-content span:first-child {
-    color: #5192cb;
-}
-
-.content-wrap .re-content {
-    margin: 10px 0 5px;
-    background-color: #f1f1f4;
-    padding: 10px;
-}
-
-.content-wrap .time {
-    color: #99a5c0;
-    font-size: 0.8rem;
-}
-
-.fy {
-    display: flex;
-    justify-content: center;
-    margin-top: 30px;
 }
 </style><style scoped>
 .comment {

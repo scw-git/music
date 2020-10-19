@@ -5,11 +5,13 @@ import router from './router'
 import './plugins/element.js'
 import axios from 'axios'
 
+
+
 Vue.prototype.$axios = axios.create({
     baseURL: 'https://api.mtnhao.com'
 })
 
-Vue.prototype.$index = new Vue() //创建空的实例，用于事件总线
+Vue.prototype.$vue = new Vue() //创建空的实例，用于事件总线
 
 //格式最新音乐中的数字
 Vue.filter('formatNum', (num) => {

@@ -26,6 +26,20 @@ export default {
 <style>
 @import './components/common.css';
 
+@media screen and (max-width: 719px) {
+    html {
+        font-size: 6px;
+        transition: all 1s;
+    }
+}
+
+@media screen and (min-width: 920px) {
+    html {
+        font-size: 16px;
+        transition: all 1s;
+    }
+}
+
 * {
     padding: 0;
     margin: 0;

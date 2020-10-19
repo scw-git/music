@@ -44,7 +44,7 @@
         </div>
     </div>
     <!--分页器-->
-    <div class="fy">
+    <div class="fy" v-if="total!=0">
         <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
         </el-pagination>
     </div>

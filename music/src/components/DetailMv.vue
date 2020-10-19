@@ -15,55 +15,8 @@
             <textarea name="" id=""></textarea>
             <button>评论</button>
         </div>
-        <div class="comment-wrap ">
-            <p>精彩评论</p>
-            <div class="comments-wrap" v-for="(item,i) in hotComment" :key="i">
-                <!--头像-->
-                <img :src="item.user.avatarUrl" alt="">
-                <div class="content-wrap">
-                    <!--评论-->
-                    <div class="content">
-                        <span>{{item.user.nickname}}: </span>
-                        <span>{{item.content}}</span>
-                    </div>
-                    <!--回复评论  注意：一定要先判断是否存在在填数据，否则填对了也不显示-->
-                    <div class="re-content" v-if="item.beReplied.length!=0">
-                        <span>{{item.beReplied[0].user.nickname}}：</span>
-                        <span>{{item.beReplied[0].content}}</span>
-                    </div>
-                    <!--时间-->
-                    <span class="time">{{item.time |formatTime}}</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="comment-wrap newComment">
-            <p>最新评论({{this.total}})</p>
-            <div class="comments-wrap" v-for="(item,i) in newComment" :key="i">
-                <!--头像-->
-                <img :src="item.user.avatarUrl" alt="">
-                <div class="content-wrap">
-                    <!--评论-->
-                    <div class="content">
-                        <span>{{item.user.nickname}}: </span>
-                        <span>{{item.content}}</span>
-                    </div>
-                    <!--回复评论  注意：一定要先判断是否存在在填数据，否则填对了也不显示-->
-                    <div class="re-content" v-if="item.beReplied.length!=0">
-                        <span>{{item.beReplied[0].user.nickname}}：</span>
-                        <span>{{item.beReplied[0].content}}</span>
-                    </div>
-                    <!--时间-->
-                    <span class="time">{{item.time |formatTime}}</span>
-                </div>
-            </div>
-            <!--分页器-->
-            <div class="fy">
-                <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
-                </el-pagination>
-            </div>
-
-        </div>
+        <!--评论-->
+        <comment :id="id" url='/comment/mv' />
     </div>
     <div class="right">
         <h3>MV介绍</h3>
@@ -96,25 +49,25 @@
 </template>
 
 <script>
+import comment from './common/comment'
+
 export default {
+    components: {
+        comment
+    },
     data() {
         return {
             mvUrl: '',
-            hotComment: [],
-            newComment: [],
-            total: 0,
-            limit: 20,
-            offset: 0,
-            page: 1,
             Mvdetail: '',
             aboutMv: [],
+            id: this.$route.query.mvId
         }
     },
     methods: {
         handleCurrentChange(val) {
             // console.log(`当前页: ${val}`);
             this.page = val
-            this.getMvComment(this.$route.query.mvId)
+            this.getMvComment(this.id)
         },
         //获取mv播放链接
         getMvUrl(id) {
@@ -123,23 +76,7 @@ export default {
                 // console.log(res)
             })
         },
-        //获取mv评论
-        getMvComment(id) {
-            this.$axios({
-                method: 'get',
-                url: '/comment/mv',
-                params: {
-                    id: id,
-                    limit: this.limit,
-                    offset: (this.page - 1) * this.limit
-                }
-            }).then(res => {
-                this.hotComment = res.data.hotComments
-                this.newComment = res.data.comments
-                this.total = res.data.total
-                // console.log(res)
-            })
-        },
+
         //获取mv详情
         getMvDetail(id) {
             this.$axios.get('/mv/detail?mvid=' + id).then(res => {
@@ -157,17 +94,16 @@ export default {
         },
         //点击相关推荐
         play(id) {
+            this.id = id
             this.getMvUrl(id)
             this.getAbout(id)
-            this.getMvComment(id)
             this.getMvDetail(id)
         }
     },
     created() {
-        this.getMvUrl(this.$route.query.mvId)
-        this.getMvComment(this.$route.query.mvId)
-        this.getMvDetail(this.$route.query.mvId)
-        this.getAbout(this.$route.query.mvId)
+        this.getMvUrl(this.id)
+        this.getMvDetail(this.id)
+        this.getAbout(this.id)
     }
 }
 </script>
@@ -219,21 +155,6 @@ video {
     height: 450px;
     margin-top: 10px;
     outline: none;
-}
-
-.comment-wrap>>>.el-pagination.is-background .el-pager li:not(.disabled) {
-    background-color: rgb(244, 244, 245);
-    color: rgb(0, 0, 0);
-}
-
-.comment-wrap>>>.el-pagination.is-background .el-pager li:not(.disabled).active {
-    background-color: rgb(230, 175, 23);
-    color: white;
-}
-
-.comment-wrap>>>.el-pagination.is-background .el-pager li:not(.disabled):hover {
-    color: rgb(255, 189, 7);
-
 }
 
 .right {

@@ -43,34 +43,23 @@
         </div>
     </div>
     <!-- 精彩MV-->
-    <div class="wypublish">
-        <h2 class="title">精彩MV</h2>
-        <div class="items">
-            <div class="item" v-for="(item,i) in wypublish" :key="i" @click="toDetailMv(item.id)">
-                <div class="img-wrap">
-                    <img :src="item.cover" alt="">
-                    <div class="cover">
-                        <span class="iconfont icon-play2"></span>
-                        <span>{{item.playCount |formatPlayCount}}</span>
-                    </div>
-                </div>
-                <div class="name">{{item.name}}</div>
-            </div>
-        </div>
-    </div>
+    <mv url='/mv/all?limit=8' />
 
 </div>
 </template>
 
 <script>
+import mv from './common/mv'
 export default {
+    components: {
+        mv
+    },
     data() {
         return {
             banners: '', //轮播图
             lists: [], //推荐歌单
             newsong: [], //最新音乐
             allid: [], //最新音乐所有的id
-            wypublish: [], //精彩MV
             loading: false
         }
     },
@@ -84,22 +73,14 @@ export default {
                 }
             })
         },
-        //  跳转到mv详情
-        toDetailMv(id) {
-            this.$router.push({
-                path: '/DetailMv',
-                query: {
-                    mvId: id
-                }
-            })
-        },
+
         //把歌曲id传到父组件中
         playmusic(id) {
             this.$axios.get('/song/url?id=' + id).then(res => {
                 this.$parent.url = res.data.data[0].url
                 this.$parent.currentId = id
                 this.$parent.allSongsId = this.allid
-                console.log(this.allid)
+                // console.log(this.allid)
             })
         },
         getallid() { //最新音乐所有的id
@@ -127,11 +108,6 @@ export default {
             // console.log(this.allurl)
         }).then(() => { //获取所有ID
             this.getallid() //必须要执行完获取音乐，才能执行获取id
-        })
-        //精彩MV
-        this.$axios.get('/top/mv?limit=8').then(res => {
-            this.wypublish = res.data.data
-            // console.log(this.wypublish)
         })
 
     },
@@ -306,36 +282,5 @@ export default {
     margin-top: 20px;
     font-size: 0.9rem;
     color: rgb(96, 98, 126)
-}
-
-.wypublish .items {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-}
-
-.wypublish .items .item {
-    width: 24%;
-}
-
-.wypublish .items .item .name {
-    margin: 8px 5px;
-    font-size: 0.9rem;
-}
-
-.wypublish .items .item .img-wrap {
-    width: 100%;
-    position: relative;
-}
-
-.wypublish .items .item .img-wrap .cover {
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    color: white;
-}
-
-.wypublish .items .item .img-wrap .cover span {
-    padding: 0 3px;
 }
 </style>

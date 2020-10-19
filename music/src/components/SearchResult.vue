@@ -26,7 +26,7 @@
                     </tbody>
                 </table>
                 <!--分页器-->
-                <div class="fy">
+                <div class="fy" v-if="total!=0">
                     <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
                     </el-pagination>
                 </div>
@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 <!--分页器-->
-                <div class="fy">
+                <div class="fy" v-if="total!=0">
                     <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
                     </el-pagination>
                 </div>
@@ -74,7 +74,7 @@
                     </div>
                 </div>
                 <!--分页器-->
-                <div class="fy">
+                <div class="fy" v-if="total!=0">
                     <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
                     </el-pagination>
                 </div>
@@ -96,13 +96,13 @@ export default {
             mv: [], //视频
             page: 1,
             limit: 30,
-            name: '首单曲', //切换歌曲、歌单、mv时显示不同内容
+            name: '', //切换歌曲、歌单、mv时显示不同内容
             allId: [], //所以歌曲id
             index: -1, //不能一开始就是0，会把第一个变成红色。用来记录当前播放歌曲的索引号，以便把它变成红色
         }
     },
     mounted() {
-        this.$index.$on('index', (res) => { //接收一个函数，res中保存传过来的值
+        this.$vue.$on('index', (res) => { //接收一个函数，res中保存传过来的值
             this.index = res
             // console.log('fdgggs111')
         })
@@ -138,7 +138,7 @@ export default {
             })
         },
         play(id, i) {
-            this.index = i//如果不加这个，第一个点击的不会变红
+            this.index = i //如果不加这个，第一个点击的不会变红
             this.$axios.get('/song/url?id=' + id).then(res => {
                 this.$parent.url = res.data.data[0].url
                 this.$parent.currentId = id
@@ -160,7 +160,7 @@ export default {
             }).then(res => {
                 this.songs = res.data.result.songs
                 this.total = res.data.result.songCount
-                this.name = '首单曲'
+
                 for (let i = 0; i < this.songs.length; i++) {
                     this.allId.push(this.songs[i].id)
                 }
@@ -180,7 +180,7 @@ export default {
             }).then(res => {
                 this.playlists = res.data.result.playlists
                 this.total = res.data.result.playlistCount
-                this.name = '个歌单'
+
             })
         },
         getMv() { //获取mv
@@ -196,7 +196,7 @@ export default {
             }).then(res => {
                 this.total = res.data.result.mvCount
                 this.mv = res.data.result.mvs
-                this.name = '个视频'
+
                 // console.log(res)
             })
         }
@@ -218,13 +218,13 @@ export default {
             this.page = 1 //切换不同的分类时，把页数重置成1
             if (this.activeName == 'songs') {
                 this.getSong() //调用歌曲的
-
+                this.name = '首单曲'
             } else if (this.activeName == 'playlist') {
                 this.getPlayList() //调用歌单的
-
+                this.name = '个歌单'
             } else if (this.activeName == 'mv') {
                 this.getMv() //调用mv的
-
+                this.name = '个视频'
             }
 
         }
@@ -234,6 +234,12 @@ export default {
 </script>
 
 <style scoped>
+.wypublish .items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
 .SearchResult {
     user-select: none;
 }

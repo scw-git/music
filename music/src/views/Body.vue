@@ -33,9 +33,11 @@
     <div class="currentPlaySong" v-if="url" @click="toSongdetail(currentId)">
         <img :src="currentSongDetail.al.picUrl" alt="">
         <div class="songContent">
-            <p>{{currentSongDetail.ar[0].name}}</p>
             <p>{{currentSongDetail.name}}</p>
+            <p>{{currentSongDetail.ar[0].name}}</p>
         </div>
+        <span class="iconfont icon-shuangjiantou-shang" v-if="isShow"></span>
+        <span class="iconfont icon-shuangjiantou-xia" v-if="!isShow"></span>
     </div>
     <!--底下播放器-->
     <div class="play">
@@ -96,17 +98,29 @@ export default {
             this.isPlay = true
             this.getCurrentSongDetail()
             this.setAudioInfo()
+            this.$vue.$emit('isPlay', this.isPlay)
         },
+        isPlay() {
+            this.$vue.$emit('isPlay', this.isPlay)
+        },
+        $router() {
+            console.log(this.$router)
+        }
 
     },
     methods: {
         //跳转到歌曲详情页面
         toSongdetail(id) {
-            this.margin = 'margin-left:0'
+            this.isShow = !this.isShow
+            if (this.isShow == true) {
+                this.$router.go(-1)
+
+            }
+            // this.$vue.$emit('isPlay', this.isPlay)
             this.$router.push({
                 path: '/SongDetail',
                 query: {
-                    songId: id
+                    songId: id,
                 }
             })
         },
@@ -137,6 +151,8 @@ export default {
             audio.addEventListener('timeupdate', () => {
                 this.totalDuration = audio.duration //获取歌曲总时长
                 this.currentTime = audio.currentTime //获取当前歌曲播放了多少秒
+                this.$vue.$emit('currentTime', this.currentTime) //把当前时间传到SongDetail中
+                // console.log(this.currentTime)
                 //自动播放下一首
                 if (this.currentTime >= this.totalDuration) {
                     this.nextSong()
@@ -153,8 +169,6 @@ export default {
             })
         },
         nextSong() { //点击下一首
-            // console.log(this.allSongsId)
-            // console.log(this.currentId)
             if (this.currentId == this.allSongsId[this.allSongsId.length - 1]) {
                 this.$message({
                     message: '我是有底线的呢！！',
@@ -164,7 +178,7 @@ export default {
 
             } else {
                 this.index++
-                this.$index.$emit('index', this.index) //参数一：自定义事件名。参数二：要传递的数据
+                this.$vue.$emit('index', this.index) //参数一：自定义事件名。参数二：要传递的数据
                 for (let i = 0; i < this.allSongsId.length; i++) {
                     if (this.currentId == this.allSongsId[i]) {
                         this.nextSongId = this.allSongsId[i + 1]
@@ -175,6 +189,7 @@ export default {
                     }
                 }
                 this.currentId = this.nextSongId //把下一首的id设置成当前播放id
+                this.$vue.$emit('currentId', this.currentId) //参数一：自定义事件名。参数二：要传递的数据
                 // console.log(this.nextSongId)
             }
         },
@@ -186,19 +201,16 @@ export default {
                     type: 'warning',
                     offset: 70
                 });
-
             } else {
                 this.index--
-                this.$index.$emit('index', this.index) //参数一：自定义事件名。参数二：要传递的数据
-                for (let i = 0; i < this.allSongsId.length; i++) {
-                    if (this.currentId == this.allSongsId[i]) {
-                        this.upSongId = this.allSongsId[i - 1]
-                        this.$axios.get('/song/url?id=' + this.upSongId)
-                            .then(res => {
-                                this.url = res.data.data[0].url
-                            })
-                    }
-                }
+                this.$vue.$emit('index', this.index) //参数一：自定义事件名。参数二：要传递的数据
+                this.upSongId = this.allSongsId[this.allSongsId.findIndex(res => {
+                    return res === this.currentId
+                }) - 1]
+                this.$axios.get('/song/url?id=' + this.upSongId)
+                    .then(res => {
+                        this.url = res.data.data[0].url
+                    })
                 this.currentId = this.upSongId
             }
         },
@@ -220,13 +232,12 @@ export default {
 <style>
 .body {
     display: flex;
-    cursor: pointer;
 }
 
 .aside {
-    width: 210px;
+    width: 13.125rem;
     position: fixed;
-    top: 60;
+    top: 3.75rem;
     left: 0;
     background-color: #f5f5f7;
     border-right: 1px solid #e1e1e2;
@@ -294,6 +305,17 @@ a:hover {
 .currentPlaySong img {
     width: 56px;
     margin: 7px;
+    border-radius: 5px;
+    filter: blur(1px)
+}
+
+.currentPlaySong span {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0.7rem;
+    font-size: 3rem;
+    color: white;
 }
 
 .currentPlaySong .songContent {
