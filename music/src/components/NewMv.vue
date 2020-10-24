@@ -1,5 +1,6 @@
 <template>
 <div class="NewMv">
+
     <!-- 地区分类 -->
     <div class="area ">
         <span class=" first">地区：</span>

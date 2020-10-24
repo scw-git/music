@@ -242,6 +242,7 @@ export default {
 
 .SearchResult {
     user-select: none;
+    margin-top: 30px;
 }
 
 .SearchResult .title {

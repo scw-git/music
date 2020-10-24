@@ -1,5 +1,6 @@
 <template>
 <div class="FindMusic">
+
     <!--轮播图-->
     <el-carousel :interval="4000" type="card" height="250px">
         <el-carousel-item v-for="(item,i) in banners" :key="i">
@@ -8,7 +9,9 @@
     </el-carousel>
     <!--推荐歌单-->
     <div class="recommend">
-        <h2 class="title">推荐歌单</h2>
+        <h2 class="title">推荐歌单
+            <router-link to='/tab/RecommendMusic'><span></span>更多></router-link>
+        </h2>
         <div class="items">
             <div class="item" v-for="(item,i) in lists" :key="i" @click="toDetail(item.id)">
                 <div class="img-wrap">
@@ -27,7 +30,8 @@
     </div>
     <!-- 最新音乐 -->
     <div class="newMusic" v-loading="loading">
-        <h2 class="title">最新音乐</h2>
+        <h2 class="title">最新音乐 <router-link to='/tab/NewMusic'><span></span>更多></router-link>
+        </h2>
         <div class="items">
             <div class="item" v-for="(item,i) in newsong" :key="i">
                 <div class="count">{{i+1 |formatNum}}</div>
@@ -52,7 +56,7 @@
 import mv from './common/mv'
 export default {
     components: {
-        mv
+        mv,
     },
     data() {
         return {
@@ -77,9 +81,12 @@ export default {
         //把歌曲id传到父组件中
         playmusic(id) {
             this.$axios.get('/song/url?id=' + id).then(res => {
-                this.$parent.url = res.data.data[0].url
-                this.$parent.currentId = id
-                this.$parent.allSongsId = this.allid
+                this.$vue.$emit('playData', {
+                    url: res.data.data[0].url,
+                    currentId: id,
+                    allSongsId: this.allid
+
+                })
                 // console.log(this.allid)
             })
         },
@@ -117,8 +124,20 @@ export default {
 
 <style>
 .FindMusic .title {
-    padding: 2rem 0 1.2rem 0;
+    padding: 2rem 0 0.7rem 0;
     font-weight: normal;
+    color: #252525;
+    border-bottom: 1px solid #e1e1e2;
+    margin-bottom: 0.3rem;
+}
+
+.FindMusic .title a {
+    float: right;
+    font-size: 0.8rem;
+    text-decoration: none;
+    color: #475669;
+    margin-top: 18px;
+    margin-right: 20px;
 }
 
 .lbt-img {
@@ -157,7 +176,7 @@ export default {
 
 /**公共属性开始 */
 .FindMusic .item {
-    width: 18%;
+    width: 18.5%;
     padding: 10px 5px;
 }
 
@@ -209,12 +228,11 @@ export default {
     justify-content: center;
     align-items: center;
     position: absolute;
-    height: 2rem;
-    width: 2rem;
+    padding: 0.5rem;
     right: 0.5rem;
     bottom: 0.8rem;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 1rem;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 5rem;
     opacity: 0;
     transition: all 0.5s;
 }
@@ -225,8 +243,8 @@ export default {
 }
 
 .FindMusic .cover-play-btn>div {
-    color: rgb(198, 47, 47);
-    font-size: 1.5rem;
+    color: white;
+
 }
 
 /**公共属性结尾 */
@@ -267,8 +285,8 @@ export default {
     width: 1.8rem;
     height: 1.8rem;
     border-radius: 0.9rem;
-    background-color: rgba(255, 255, 255, 0.5);
-    color: rgb(198, 47, 47);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white
 }
 
 .newMusic .detail {

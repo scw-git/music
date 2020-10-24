@@ -8,7 +8,8 @@ import axios from 'axios'
 
 
 Vue.prototype.$axios = axios.create({
-    baseURL: 'https://api.mtnhao.com'
+    // baseURL: 'https://api.mtnhao.com'
+    baseURL: 'http://localhost:3000'
 })
 
 Vue.prototype.$vue = new Vue() //创建空的实例，用于事件总线

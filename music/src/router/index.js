@@ -6,35 +6,64 @@ import NewMusic from '../components/NewMusic.vue'
 import NewMv from '../components/NewMv.vue'
 import SearchResult from '../components/SearchResult.vue'
 import DetailPlayList from '../components/DetailPlayList.vue'
-// import DetailMv from '../components/DetailMv.vue'
 import SongDetail from '../components/SongDetail.vue'
+import tab from '../components/common/tab.vue'
+import tabVideo from '../components/common/tabVideo.vue'
+import TopList from '../components/TopList.vue'
+import Video from '../components/Video.vue'
+import DetailVideo from '../components/DetailVideo.vue'
 
 Vue.use(VueRouter)
 
 const routes = [{
         path: '/',
-        redirect: '/FindMusic'
+        redirect: '/tab'
     },
     {
-        path: '/FindMusic',
-        component: FindMusic
+        path: '/tabVideo',
+        component: tabVideo,
+        redirect: '/tabVideo/Video',
+        meta: {
+            keepAlive: true
+        },
+        children: [{
+            path: 'Video',
+            component: Video
+        }, {
+            path: 'NewMv',
+            component: NewMv
+        }, ]
     },
     {
-        path: '/RecommendMusic',
-        component: RecommendMusic
+        path: '/tab',
+        component: tab,
+        redirect: '/tab/FindMusic',
+        children: [{
+                path: 'RecommendMusic',
+                component: RecommendMusic
+            },
+            {
+                path: 'FindMusic',
+                component: FindMusic
+            },
+            {
+                path: 'NewMusic',
+                component: NewMusic
+            }, {
+                path: 'TopList',
+                component: TopList
+            },
+        ]
     },
     {
-        path: '/NewMusic',
-        component: NewMusic
-    }, {
-        path: '/NewMv',
-        component: NewMv
-    }, {
         path: '/SearchResult',
         component: SearchResult
     }, {
         path: '/DetailPlayList',
-        component: DetailPlayList
+        component: DetailPlayList,
+        meta: {
+            keepAlive: true
+        }
     }, {
         path: '/DetailMv',
         component: () =>
@@ -42,6 +71,10 @@ const routes = [{
     }, {
         path: '/SongDetail',
         component: SongDetail
+    },
+    {
+        path: '/DetailVideo',
+        component: DetailVideo
     },
 
 

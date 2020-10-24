@@ -5,27 +5,36 @@
         <p>推荐</p>
         <ul class="body-items">
             <li>
-                <router-link to='/FindMusic'><span class="iconfont icon-yinyue"></span>发现音乐</router-link>
+                <router-link to='/tab'><span class="iconfont icon-yinyue"></span>发现音乐</router-link>
             </li>
             <li>
-                <router-link to='/RecommendMusic'><span class="iconfont icon-earphone"></span>推荐歌单</router-link>
+                <router-link to='/tabVideo'><span class="iconfont icon-shipin"></span>视频</router-link>
             </li>
+        </ul>
+        <p>我的音乐</p>
+        <ul class="body-items">
             <li>
-                <router-link to='/NewMusic'><span class="iconfont icon-music-note"></span>新歌速递
-                </router-link>
+                <router-link to='/1'><span class="iconfont icon-Cloud2"></span>音乐云盘</router-link>
             </li>
+        </ul>
+        <p>创建的歌单</p>
+        <ul class="body-items">
             <li>
-                <router-link to='/NewMv'><span class="iconfont icon-MV"></span>精彩MV</router-link>
+                <router-link to='/2'><span class="iconfont icon-aixin-xian"></span>我喜欢的音乐</router-link>
             </li>
+        </ul>
+        <p>收藏的歌单</p>
+        <ul class="body-items">
+
         </ul>
     </div>
 
     <!--中间内容-->
     <div class="main">
-        <div class="top-item" v-show="false">
 
-        </div>
-        <router-view></router-view>
+        <keep-alive include='tab,TopList'>
+            <router-view></router-view>
+        </keep-alive>
         <!--用来与底部留出一些距离-->
         <div class="main-div"></div>
     </div>
@@ -68,8 +77,11 @@
 </template>
 
 <script>
+import tab from '../components/common/tab'
 export default {
-
+    components: {
+        tab
+    },
     data() {
         return {
             isShow: true,
@@ -85,7 +97,7 @@ export default {
             value2: 25, //音量的初始值
             currentSongDetail: [], //当前播放歌曲的详细信息
             totalDuration: 0, //歌曲的总时长
-            index: 0, //用来记录当前播放歌曲的索引号，以便把它变成红色
+            index: -1, //用来记录当前播放歌曲的索引号，以便把它变成红色
 
         }
     },
@@ -103,10 +115,16 @@ export default {
         isPlay() {
             this.$vue.$emit('isPlay', this.isPlay)
         },
-        $router() {
-            console.log(this.$router)
-        }
-
+    },
+    mounted() {
+        //接受 TopList NewMusic FindMusic 传过来的数据
+        this.$vue.$on('playData', (res) => {
+            this.url = res.url
+            this.currentId = res.currentId
+            this.allSongsId = res.allSongsId
+            this.index = res.index
+            // console.log(res.index)
+        })
     },
     methods: {
         //跳转到歌曲详情页面
@@ -114,7 +132,6 @@ export default {
             this.isShow = !this.isShow
             if (this.isShow == true) {
                 this.$router.go(-1)
-
             }
             // this.$vue.$emit('isPlay', this.isPlay)
             this.$router.push({
@@ -168,13 +185,19 @@ export default {
                 // console.log(this.currentSongDetail)
             })
         },
+        getUrl(id) { //获取url
+            this.$axios.get('/song/url?id=' + id)
+                .then(res => {
+                    this.url = res.data.data[0].url
+                })
+        },
         nextSong() { //点击下一首
             if (this.currentId == this.allSongsId[this.allSongsId.length - 1]) {
-                this.$message({
-                    message: '我是有底线的呢！！',
-                    type: 'warning',
-                    offset: 70
-                });
+
+                this.currentId = this.allSongsId[0]
+                this.index = 0
+                this.$vue.$emit('index', this.index) //参数一：自定义事件名。参数二：要传递的数据
+                this.getUrl(this.currentId)
 
             } else {
                 this.index++
@@ -182,10 +205,7 @@ export default {
                 for (let i = 0; i < this.allSongsId.length; i++) {
                     if (this.currentId == this.allSongsId[i]) {
                         this.nextSongId = this.allSongsId[i + 1]
-                        this.$axios.get('/song/url?id=' + this.nextSongId)
-                            .then(res => {
-                                this.url = res.data.data[0].url
-                            })
+                        this.getUrl(this.nextSongId)
                     }
                 }
                 this.currentId = this.nextSongId //把下一首的id设置成当前播放id
@@ -196,21 +216,17 @@ export default {
         upSong() { //点击上一首
 
             if (this.currentId == this.allSongsId[0]) {
-                this.$message({
-                    message: '我是有上线的呢！！',
-                    type: 'warning',
-                    offset: 70
-                });
+                this.currentId = this.allSongsId[this.allSongsId.length - 1]
+                this.index = this.allSongsId.length - 1
+                this.$vue.$emit('index', this.index) //参数一：自定义事件名。参数二：要传递的数据
+                this.getUrl(this.currentId)
             } else {
                 this.index--
                 this.$vue.$emit('index', this.index) //参数一：自定义事件名。参数二：要传递的数据
                 this.upSongId = this.allSongsId[this.allSongsId.findIndex(res => {
                     return res === this.currentId
                 }) - 1]
-                this.$axios.get('/song/url?id=' + this.upSongId)
-                    .then(res => {
-                        this.url = res.data.data[0].url
-                    })
+                this.getUrl(this.upSongId)
                 this.currentId = this.upSongId
             }
         },
@@ -236,6 +252,8 @@ export default {
 
 .aside {
     width: 13.125rem;
+    font-size: 0.9rem;
+    height: 100%;
     position: fixed;
     top: 3.75rem;
     left: 0;
@@ -251,11 +269,13 @@ export default {
 
 .body-items {
     width: 100%;
-    height: 100vh;
-
 }
 
-a {
+.body-items .icon-shipin {
+    font-size: 1.25rem;
+}
+
+.body-items a {
     box-sizing: border-box;
     width: 100%;
     display: inline-block;
@@ -264,25 +284,28 @@ a {
     color: rgb(102, 102, 102);
     text-decoration: none;
     font-size: 0.9rem;
+
 }
 
 .body-items li span {
     margin-right: 15px;
 }
 
-a:hover {
+.body-items a:hover {
     color: black;
 }
 
-.router-link-exact-active {
+.body-items .router-link-active {
+
     color: black;
     background-color: rgb(230, 231, 234);
+    border-left: 3px solid #c62f2f;
 }
 
 .main {
     flex: 1;
     overflow-y: scroll;
-    padding: 25px 90px 0 90px;
+    padding: 0 50px;
     margin-left: 210px;
 }
 
@@ -438,12 +461,5 @@ audio {
     border-radius: none;
     outline: none;
 
-}
-
-.top-item {
-    width: 100%;
-    height: 50px;
-    border-bottom: 1px solid gray;
-    margin-bottom: 50px;
 }
 </style>

@@ -84,7 +84,7 @@ export default {
                 this.total = res.data.total
                 this.hotComment = res.data.hotComments
                 this.newComment = res.data.comments
-                // console.log(this.hotComment)
+                // console.log(res)
                 // console.log(this.newComment)
             })
         },

@@ -10,34 +10,71 @@
     </div>
     <!-- 新歌速递 -->
     <div class="newMusic">
-        <div class="items">
-            <div class="item" v-for="(item,i) in musiclists" :key="i">
-                <div class="count">{{i+1 |formatNum}}</div>
-                <div class="img-wrap" @click="playmusic(item.id)">
-                    <img :src="item.album.picUrl" alt="">
-                    <span class="iconfont icon-play2 playicon"></span>
-                </div>
-                <div class="detail">
-                    <div class="songname">{{item.name}}</div>
-                    <div class="singer">{{item.album.artists[0].name}}</div>
-                </div>
-            </div>
-        </div>
+        <table class="el-table ">
+            <thead>
+                <th>#</th>
+                <th></th>
+                <th>音乐标题</th>
+                <th>歌手</th>
+                <th>专辑名</th>
+                <th>时长</th>
+            </thead>
+            <tbody>
+                <tr v-for="(item,i) in musiclists" :key="i" :class="{red:index==i}" @dblclick="play(item.id,i)">
+                    <td> {{i+1|formatNum}}</td>
+                    <td><img class="img" :src="item.album.picUrl" alt=""></td>
+                    <td>{{item.name}}<span v-if="item.mvid!=0" class="iconfont icon-bofanganniu btn" @click="toDetailMv(item.mvid)"></span></td>
+                    <td>{{item.artists[0].name}}</td>
+                    <td>{{item.album.name}}</td>
+                    <td>{{item.duration |formatDuration}}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 </template>
 
 <script>
 export default {
+
     data() {
         return {
             tag: 0,
             musiclists: [],
             url: '',
-            allid: []
+            allid: [],
+            index: -1,
         }
     },
+    mounted() {
+        this.$vue.$on('index', (res) => { //接收一个函数，res中保存传过来的值
+            this.index = res
+        })
+    },
     methods: {
+        //把歌曲id传到父组件中
+        play(id, i) {
+            this.index = i //如果不加这个，第一个点击的不会变红
+            this.$axios.get('/song/url?id=' + id).then(res => {
+                this.$vue.$emit('playData', {
+                    url: res.data.data[0].url,
+                    currentId: id,
+                    allSongsId: this.allid,
+                    index: this.index
+
+                })
+            })
+        },
+        //  跳转到mv详情
+        toDetailMv(id) {
+            this.$router.push({
+                path: '/DetailMv',
+                query: {
+                    mvId: id
+                }
+            })
+        },
+
         getMusic() {
             this.$axios({
                 method: 'get',
@@ -51,16 +88,17 @@ export default {
                 for (let i = 0; i < this.musiclists.length; i++) {
                     this.allid.push(this.musiclists[i].id)
                 }
-                // console.log(this.allid)
+                console.log(this.musiclists)
             })
         },
         playmusic(id) {
             this.$axios.get('/song/url?id=' + id).then(res => {
                 this.url = res.data.data[0].url
-                this.$parent.url = this.url
-                this.$parent.currentId = id
-                this.$parent.allSongsId = this.allid
-                // console.log(res)
+                this.$vue.$emit('playData', {
+                    url: this.url,
+                    currentId: id,
+                    allSongsId: this.allid
+                })
             })
         },
 
@@ -78,143 +116,73 @@ export default {
 </script>
 
 <style scoped>
+.el-table .img {
+    width: 50px;
+}
+
+.comment {
+    margin-top: 15px;
+}
+
+.comment>>>.el-tabs__active-bar {
+    background-color: #c3473a;
+
+}
+
+.comment>>>.el-tabs__item:hover,
+.comment>>>.el-tabs__item.is-active {
+    color: #c3473a;
+}
+
+.el-table {
+    border-collapse: collapse
+}
+
+.el-table td {
+    border: 0;
+}
+
+.el-table td,
+.el-table th {
+    padding: 25px 15px 25px 25px;
+}
+
+.el-table tr:nth-child(2n) {
+    background-color: rgb(249, 249, 249);
+}
+
+.el-table tr:hover {
+    background-color: rgb(240, 240, 240);
+
+}
+
+.el-table .btn {
+    font-size: 0.5rem;
+    color: red;
+    border: 1px solid red;
+    cursor: pointer;
+    margin-left: 5px;
+}
+
+.red {
+    color: #c63030;
+}
+
 .type {
     margin-top: 10px;
-    margin-bottom: 50px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e1e1e2;
 }
 
 .type .active {
-    color: rgb(224, 126, 21);
+    color: #c62f2f;
+    border-bottom: 1px solid #c62f2f;
 }
 
 .type span {
     cursor: pointer;
     padding: 8px;
-}
+    padding-bottom: 15px;
 
-.newMusic .item {
-    width: 18%;
-    padding: 10px 5px;
-}
-
-.newMusic .item>p {
-    padding-top: 5px;
-    font-size: 0.9rem;
-}
-
-.newMusic .item .img-wrap {
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-}
-
-.newMusic .item .img-wrap img {
-    width: 100%;
-    height: 100%;
-    border-radius: 0.4rem;
-}
-
-.newMusic .item .img-wrap .cover-content {
-    position: absolute;
-    box-sizing: border-box;
-    border-radius: 0.5rem 0.5rem 0 0;
-    line-height: 1.5rem;
-    top: -60px;
-    color: white;
-    font-size: 0.8rem;
-    padding: 0.2rem;
-    width: 100%;
-    min-height: 2rem;
-    max-height: 5rem;
-    background-color: rgba(0, 0, 0, 0.5);
-    transition: all 0.5s;
-}
-
-.newMusic .item .img-wrap:hover .cover-content {
-    transition: all 0.5s;
-    top: 0;
-}
-
-.newMusic .item .img-wrap .cover-content p {
-    padding-left: 5px;
-    font-size: 0.8rem;
-}
-
-.newMusic .cover-play-btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: absolute;
-    height: 2rem;
-    width: 2rem;
-    right: 0.5rem;
-    bottom: 0.8rem;
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 1rem;
-    opacity: 0;
-    transition: all 0.5s;
-}
-
-.newMusic .item .img-wrap:hover .cover-play-btn {
-    opacity: 1;
-    transition: all 0.8s;
-}
-
-.newMusic .cover-play-btn>div {
-    color: rgb(198, 47, 47);
-    font-size: 1.5rem;
-}
-
-/**最新音乐 */
-
-.newMusic .items {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-.newMusic .item {
-    display: flex;
-    width: 49%;
-    /*不懂为啥，设置50%会掉下来 */
-}
-
-.newMusic .item .count {
-    height: 100px;
-    width: 50px;
-    line-height: 100px;
-}
-
-.newMusic .item .img-wrap {
-    position: relative;
-    height: 100%;
-    width: 100px;
-}
-
-.newMusic .item .img-wrap .playicon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    line-height: 1.8rem;
-    display: inline-block;
-    width: 1.8rem;
-    height: 1.8rem;
-    border-radius: 0.9rem;
-    background-color: rgba(255, 255, 255, 0.5);
-    color: rgb(198, 47, 47);
-}
-
-.newMusic .detail {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding-left: 8px;
-}
-
-.newMusic .detail .singer {
-    margin-top: 20px;
-    font-size: 0.9rem;
-    color: rgb(96, 98, 126)
 }
 </style>

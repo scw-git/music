@@ -85,7 +85,7 @@ export default {
             isShow: true, //用来显示与隐藏简介的
             index: -1, //不能一开始就是0，会把第一个变成红色。用来记录当前播放歌曲的索引号，以便把它变成红色
             id: this.$route.query.playListId,
-            total: 11111
+            total: 0
         }
     },
     methods: {
@@ -137,7 +137,7 @@ export default {
                 this.allid = this.arrid.join() //把歌曲trackids转换成字符串
                 this.$axios.get('/song/detail?ids=' + this.allid).then(res => { //根据trackids获取歌曲内容
                     this.songs = res.data.songs
-                    // console.log(this.songs)
+                    console.log(this.songs)
                 })
                 // console.log(this.arrid)
             })
@@ -178,6 +178,10 @@ export default {
 </style><style scoped>
 .comment {
     user-select: none;
+}
+
+.DetailPlayList {
+    margin-top: 30px;
 }
 
 .DetailPlayList .top-wrap {

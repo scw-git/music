@@ -3,14 +3,14 @@
     <div class="song">
         <div class="left">
             <img class="bar " :class="{playbar:isPlay}" src="../assets/player_bar.png" alt="">
-            <div class="bg autoRotate" :class="{playing:isPlay}"><img :src="img" alt=""></div>
+            <div class="bg autoRotate" :class="{playing:isPlay}"><img :src="img" v-if="img!=''" alt=""></div>
         </div>
         <div class="right">
             <span class="name">{{song}}</span>
             <span>MV</span>
             <p class="singer">歌手：<span class="art">{{singer}}</span></p>
             <div class="scroll" ref="scroll">
-                <div class="lyrics-wrap">
+                <div class="lyrics-wrap" ref="index">
                     <div class="lyrics" v-for="(item,key,i) in lyrObj" :key="i">
                         <!--必须用 allKeys[i] 代替 key。否则有可能，几句歌词同时变色-->
                         <p :class="{red:currentTime>allKeys[i] && currentTime<allKeys[i+1]}">{{item}}</p>
@@ -65,7 +65,7 @@ export default {
     data() {
         return {
             img: '',
-
+            index: -1,
             song: '', //歌曲
             singer: '', //歌手
             simiPlayList: [], //包含这首歌的歌单
@@ -78,6 +78,9 @@ export default {
             allKeys: [], //存储了所有歌词对应的时间（只有时间）
         }
     },
+    updated() {
+        this.getIndex()
+    },
     watch: {
         id() {
             this.getAbout()
@@ -85,24 +88,7 @@ export default {
             this.getContain()
             this.getLyric()
         },
-        // currentTime() {
-        //     // if (this.currentTime > this.allKeys[i] && this.currentTime < this.allKeys[i + 1]) {
-        //     //     console.log(i)
-        //     // }
 
-        //     // console.log('11')
-        // }
-        // currentTime() {
-        //     console.log(this.allKeys)
-        //     // console.log(this.lyrObj)
-        //     for (let i = 0; i < this.allKeys.length; i++) {
-        //         console.log(this.allKeys)
-
-        //         if (this.currentTime > this.allKeys[i] && this.currentTime < this.allKeys[i + 1] && i > 5) {
-        //             console.log(this.allKeys[i])
-        //         }
-        //     }
-        // }
     },
     mounted() {
         //获取当前播放时间
@@ -121,6 +107,7 @@ export default {
         //歌词滚动
         this.bs = new BetterScroll(this.$refs.scroll, {
             //这里写配置
+            scrollY: true
         })
     },
     created() {
@@ -136,6 +123,14 @@ export default {
             // console.log(`当前页: ${val}`);
             this.page = val
 
+        },
+        getIndex() {
+            // let index = this.$refs.index
+            // window.clearInterval(timer)
+            // let timer = window.setInterval(() => {
+            //     if (this.currentTime > )
+            //         console.log(index);
+            // }, 1000)
         },
         //获取所有的歌词对应的时间  
         getAllKeys() {

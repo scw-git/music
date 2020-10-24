@@ -2,12 +2,14 @@
 <div id="app">
     <my-header></my-header>
     <my-body></my-body>
+    <login />
 </div>
 </template>
 
 <script>
 import Body from './views/Body'
 import Header from './views/Header'
+import Login from './views/Login'
 
 export default {
     data() {
@@ -19,6 +21,7 @@ export default {
     components: {
         'myHeader': Header,
         'myBody': Body,
+        Login,
     }
 }
 </script>

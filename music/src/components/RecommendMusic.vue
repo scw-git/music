@@ -1,5 +1,6 @@
 <template>
 <div class="recMusic">
+
     <div class="top">
         <div class="icon" @click="toDetail(titlelist.id)">
             <img :src="titlelist.coverImgUrl" alt="">
@@ -38,7 +39,6 @@
                 <div class="item" v-for="(item,i) in lists" :key="i" @click="toDetail(item.id)">
                     <div class="img-wrap">
                         <img :src="item.coverImgUrl" alt="">
-                        <div class="black-cover"></div>
                         <div class="cover-play ">
                             <span class="iconfont icon-earphone"></span>
                             <span class="playcount">{{item.playCount |formatPlayCount}}</span>
@@ -51,7 +51,7 @@
         </div>
     </div>
     <!--分页器-->
-    <div class="fy"  v-if="total!=0">
+    <div class="fy" v-if="total!=0">
         <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
         </el-pagination>
     </div>
@@ -60,6 +60,7 @@
 
 <script>
 export default {
+
     data() {
         return {
             tag: "全部",
@@ -246,16 +247,6 @@ export default {
     cursor: pointer;
 }
 
-.item .img-wrap .black-cover {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 2rem;
-    width: 100%;
-    background-color: rgba(8, 8, 8, 0.1);
-    border-radius: 0.5rem 0.5rem 0 0;
-}
-
 .item .img-wrap img {
     width: 100%;
     height: 100%;
@@ -268,7 +259,9 @@ export default {
     top: 0;
     right: 0;
     color: white;
-    padding: 5px;
+    padding: 2px 5px 2px 50px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(73, 73, 73, 0.4));
+    border-radius: 0 0.4rem 0 0;
 
 }
 
