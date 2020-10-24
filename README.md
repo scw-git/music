@@ -7,6 +7,7 @@
 * 排行榜
 * 最新音乐
 * 视频和mv
+* 登录
 * 歌单详情
 * 歌曲详情
 * 视频和mv详情
@@ -14,7 +15,6 @@
 * 相似mv
 * 搜索详情
 * 自动播放
-* 登录
 ## 项目效果展示
 ### 首页
 ![](https://github.com/scw-git/music/blob/master/img/%E9%A6%96%E9%A1%B5.png)
@@ -28,13 +28,14 @@
 ![](https://github.com/scw-git/music/blob/master/img/%E8%A7%86%E9%A2%911.png)
 ![](https://github.com/scw-git/music/blob/master/img/%E8%A7%86%E9%A2%912.png)
 ![](https://github.com/scw-git/music/blob/master/img/%E8%A7%86%E9%A2%91%E5%92%8Cmv%E8%AF%A6%E6%83%85.png)
+### 登录
+![](https://github.com/scw-git/music/blob/master/img/%E7%99%BB%E5%BD%95.png)
+![](https://github.com/scw-git/music/blob/master/img/%E7%99%BB%E5%BD%95%E5%90%8E.png)
 ### 歌单详情
 ![](https://github.com/scw-git/music/blob/master/img/%E6%AD%8C%E5%8D%95%E8%AF%A6%E6%83%85.png)
 ### 歌曲详情
 ![](https://github.com/scw-git/music/blob/master/img/%E6%AD%8C%E6%9B%B2%E8%AF%A6%E6%83%85.png)
 ### 视频和mv详情
 ![](https://github.com/scw-git/music/blob/master/img/%E8%A7%86%E9%A2%91%E5%92%8Cmv%E8%AF%A6%E6%83%85.png)
-### 登录
-![](https://github.com/scw-git/music/blob/master/img/%E7%99%BB%E5%BD%95.png)
-![](https://github.com/scw-git/music/blob/master/img/%E7%99%BB%E5%BD%95%E5%90%8E.png)
+
 
