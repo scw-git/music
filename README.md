@@ -6,6 +6,7 @@
 > 2. ElementUi
 > 3. VueCli
 > 4.部分样式用到了less
+> 5.axios
 ### 目前功能（后续还会添加）
 * 首页
 * 歌单
@@ -16,11 +17,13 @@
 * 歌单详情
 * 歌曲详情
 * 视频和mv详情
-* 歌曲评论、mv评论
+* 歌曲、mv、歌单、视频评论
+* 收藏歌单
 * 相似mv
 * 搜索详情
 * 自动播放
 ## 项目效果展示
+视频预览地址：https://www.bilibili.com/video/bv1dy4y1r7jg
 ### 首页
 ![](https://github.com/scw-git/music/blob/master/img/%E9%A6%96%E9%A1%B5.png)
 ### 歌单
