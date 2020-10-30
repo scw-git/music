@@ -68,7 +68,7 @@
 </template>
 
 <script>
-import comment from './common/comment'
+import comment from '../common/comment'
 
 export default {
     components: {

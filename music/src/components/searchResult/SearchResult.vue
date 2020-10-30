@@ -90,7 +90,7 @@
 </template>
 
 <script>
-import songList from './common/songList'
+import songList from '../common/songList'
 export default {
     components: {
         songList
@@ -135,6 +135,7 @@ export default {
             } else if (this.activeName == 'video') {
                 this.getVideo()
             }
+            window.sessionStorage.setItem('SearchResultPage', this.page)
 
         },
         //  跳转到mv详情
@@ -245,7 +246,12 @@ export default {
     },
     created() {
         this.getSong() //一进来就获取歌曲
-
+        if (window.sessionStorage.getItem('activeName')) {
+            this.activeName = window.sessionStorage.getItem('activeName')
+        }
+        if (window.sessionStorage.getItem('SearchResultPage')) {
+            this.page = window.sessionStorage.getItem('SearchResultPage')
+        }
     },
     watch: {
         //监听路由变化，因为在result中在次搜索。不会刷新
@@ -257,6 +263,7 @@ export default {
         },
         // 监听是否切换了tap
         activeName() {
+            window.sessionStorage.setItem('activeName', this.activeName)
             this.page = 1 //切换不同的分类时，把页数重置成1
             if (this.activeName == 'songs') {
                 this.getSong() //调用歌曲的

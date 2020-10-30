@@ -27,8 +27,6 @@ export default {
 </script>
 
 <style>
-@import './components/common.css';
-
 @media screen and (max-width: 719px) {
     html {
         font-size: 6px;

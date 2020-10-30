@@ -1,8 +1,8 @@
 <template>
-<div class="SongDetail">
+<div class="DetailSong">
     <div class="song">
         <div class="left">
-            <img class="bar " :class="{playbar:isPlay}" src="../assets/player_bar.png" alt="">
+            <img class="bar " :class="{playbar:isPlay}" src="../../assets/player_bar.png" alt="">
             <div class="bg autoRotate" :class="{playing:isPlay}"><img :src="img" v-if="img!=''" alt=""></div>
         </div>
         <div class="right">
@@ -24,7 +24,7 @@
         <!--左边的评论-->
 
         <comment class="comment" :id='id' :url='url'>
-            <template slot='songDetail'>
+            <template slot='DetailSong'>
                 <!--发布评论-->
                 <div class="addComment">
                     <textarea name="" id="" @keydown.enter="comment" v-model="content"></textarea>
@@ -66,7 +66,7 @@
 
 <script>
 import BetterScroll from 'better-scroll'
-import comment from './common/comment'
+import comment from '../common/comment'
 // let bs = new BetterScroll('.wrapper', {})
 export default {
     components: {

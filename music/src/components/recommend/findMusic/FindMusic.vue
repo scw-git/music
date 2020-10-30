@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import mv from './common/mv'
+import mv from '../../common/mv'
 export default {
     components: {
         mv,

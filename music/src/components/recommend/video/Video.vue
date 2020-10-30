@@ -3,7 +3,7 @@
     <span class="allVedio" @click="openType" style="cursor:pointer">{{tag}} <span class="iconfont icon-icon_arrowdown"></span></span>
     <div class="type">
         <span>分类：</span>
-        <span class="category" :class="{red:item.name==tag}" @click="changeTag(item.name,item.id)" v-for="(item, i) in category" :key="i">{{item.name}}</span>
+        <span class="category" :class="{red:item.name==tag}" @click="changeTag(item.name,item.id)" v-for="(item, i) in group.slice(0,8)" :key="i">{{item.name}}</span>
         <div class="cover" ref="cover" @click="closeType"></div>
         <div class="group" ref="group">
             <div class="content">
@@ -137,7 +137,7 @@ export default {
 
         }).then(res => {
             this.category = res.data.data
-            console.log(this.category)
+            // console.log(this.category)
         })
         this.$axios({ //获取视频标签列表
             method: 'get',

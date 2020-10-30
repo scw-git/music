@@ -246,7 +246,7 @@ export default {
             }
             // this.$vue.$emit('isPlay', this.isPlay)
             this.$router.push({
-                path: '/SongDetail',
+                path: '/DetailSong',
                 query: {
                     songId: id,
                 }

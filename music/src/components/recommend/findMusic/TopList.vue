@@ -4,7 +4,7 @@
         <h3>官方榜</h3>
         <div class="items">
             <div class="item">
-                <img src="../assets/uplist.jpg" @click="more(allList[0].id)" alt="">
+                <img src="../../../assets/uplist.jpg" @click="more(allList[0].id)" alt="">
                 <ul>
                     <li v-for="(item,i) in upList" :key="i" @click="play(item.id,upList)"> <span class="index">{{i+1 }} </span> {{ item.name}}<span class="name">{{item.ar[0].name}}</span></li>
 
@@ -12,7 +12,7 @@
                 <div class="more"><span @click="more(allList[0].id)">查看全部></span></div>
             </div>
             <div class="item">
-                <img src="../assets/newList.png" @click="more(allList[1].id)" alt="">
+                <img src="../../../assets/newList.png" @click="more(allList[1].id)" alt="">
                 <ul>
                     <li v-for="(item,i) in newList" :key="i" @click="play(item.id,newList)"> <span class="index">{{i+1 }} </span> {{ item.name}}<span class="name">{{item.ar[0].name}}</span></li>
 
@@ -20,7 +20,7 @@
                 <div class="more"><span @click="more(allList[1].id)">查看全部></span></div>
             </div>
             <div class="item">
-                <img src="../assets/yclist.png" @click="more(allList[2].id)" alt="">
+                <img src="../../../assets/yclist.png" @click="more(allList[2].id)" alt="">
                 <ul>
                     <li v-for="(item,i) in ycList" :key="i" @click="play(item.id,ycList)"> <span class="index">{{i+1 }} </span> {{ item.name}}<span class="name">{{item.ar[0].name}}</span></li>
 
@@ -28,7 +28,7 @@
                 <div class="more"><span @click="more(allList[2].id)">查看全部></span></div>
             </div>
             <div class="item">
-                <img src="../assets/hotlist.png" @click="more(allList[3].id)" alt="">
+                <img src="../../../assets/hotlist.png" @click="more(allList[3].id)" alt="">
                 <ul>
                     <li v-for="(item,i) in hotList" :key="i" @click="play(item.id,hotList)"> <span class="index">{{i+1 }} </span> {{ item.name}}<span class="name">{{item.ar[0].name}}</span></li>
 

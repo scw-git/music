@@ -1,21 +1,21 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import FindMusic from '../components/FindMusic.vue'
-import RecommendMusic from '../components/RecommendMusic.vue'
-import NewMusic from '../components/NewMusic.vue'
-import NewMv from '../components/NewMv.vue'
-import SearchResult from '../components/SearchResult.vue'
-import DetailPlayList from '../components/DetailPlayList.vue'
-import SongDetail from '../components/SongDetail.vue'
+import FindMusic from '../components/recommend/findMusic/FindMusic.vue'
+import RecommendMusic from '../components/recommend/findMusic/RecommendMusic.vue'
+import NewMusic from '../components/recommend/findMusic/NewMusic.vue'
+import TopList from '../components/recommend/findMusic/TopList.vue'
+import Video from '../components/recommend/video/Video.vue'
+import NewMv from '../components/recommend/video/NewMv.vue'
+import CloudMusic from '../components/myMusic/CloudMusic.vue'
+import MyCollect from '../components/myMusic/MyCollect.vue'
+import FavMusic from '../components/createPlayList/FavMusic.vue'
+import CollectPlayList from '../components/collectPlayList/CollectPlayList.vue'
+import DetailPlayList from '../components/detail/DetailPlayList.vue'
+import DetailVideo from '../components/detail/DetailVideo.vue'
+import DetailSong from '../components/detail/DetailSong.vue'
+import SearchResult from '../components/searchResult/SearchResult.vue'
 import tab from '../components/common/tab.vue'
 import tabVideo from '../components/common/tabVideo.vue'
-import TopList from '../components/TopList.vue'
-import Video from '../components/Video.vue'
-import DetailVideo from '../components/DetailVideo.vue'
-import CloudMusic from '../components/CloudMusic.vue'
-import MyCollect from '../components/MyCollect.vue'
-import FavMusic from '../components/FavMusic.vue'
-import CollectPlayList from '../components/CollectPlayList.vue'
 
 Vue.use(VueRouter)
 
@@ -78,10 +78,10 @@ const routes = [{
     }, {
         path: '/DetailMv',
         component: () =>
-            import ('../components/DetailMv.vue')
+            import ('../components/detail/DetailMv.vue')
     }, {
-        path: '/SongDetail',
-        component: SongDetail
+        path: '/DetailSong',
+        component: DetailSong
     },
     {
         path: '/DetailVideo',

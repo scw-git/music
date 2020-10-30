@@ -2,45 +2,45 @@
 <div class="DetailMv">
     <div class="left">
         <div class="title">
-            <span>MV</span>
-            <span>{{Mvdetail.name}}</span>
-            <span>{{Mvdetail.artistName}}</span>
+            <span>视频</span>
+            <span>{{videoDetail.title}}</span>
+            <span>{{videoDetail.creator.nickname}}</span>
         </div>
-        <video :src="mvUrl" controls autoplay></video>
+        <video :src="videoUrl" controls autoplay></video>
         <div class="pl">
             <p>评论<span> ({{total}})</span></p>
         </div>
         <!--发布评论-->
         <div class="addComment">
-            <textarea name="" id="" v-model="content" @keydown.enter="comment"></textarea>
+            <textarea name="" id="" @keydown.enter="comment" v-model="content"></textarea>
             <button @click="comment">评论</button>
         </div>
         <!--评论-->
-        <comment :id="id" :url='url' @total='total=$event' />
+        <comment :id="vid" :url='url' @total='total=$event' />
     </div>
     <div class="right">
-        <h3>MV介绍</h3>
+        <h3>视频介绍</h3>
         <div class="describe">
-            <span>发布时间：{{Mvdetail.publishTime}}</span>
-            <span>播放次数：{{Mvdetail.playCount|formatPlayCount}}次</span>
+            <span>发布时间：{{videoDetail.publishTime |formatYMD}}</span>
+            <span>播放次数：{{videoDetail.playTime|formatPlayCount}}次</span>
             <div class="profile">
-                简介：{{Mvdetail.desc}}
+                简介：{{videoDetail.description}}
             </div>
         </div>
         <h3 class="about">相关推荐</h3>
         <div class="items">
-            <div class="item" v-for="(item,i) in aboutMv" :key="i" @click="play(item.id)">
+            <div class="item" v-for="(item,i) in aboutVideo" :key="i" @click="play(item.vid)">
                 <div class="img-wrap">
-                    <img :src="item.cover" alt="">
+                    <img :src="item.coverUrl" alt="">
                     <div class="play-count">
                         <span class="iconfont icon-video"></span>
-                        <span>{{item.playCount |formatPlayCount}}</span>
+                        <span>{{item.playTime |formatPlayCount}}</span>
                     </div>
                 </div>
                 <div class="content-wrap">
-                    <div>{{item.name}}</div>
-                    <div>{{item.duration|formatDuration}}</div>
-                    <div>by {{item.artistName}}</div>
+                    <div>{{item.title}}</div>
+                    <div>{{item.durationms|formatDuration}}</div>
+                    <div>by {{item.creator["0"].userName}}</div>
                 </div>
             </div>
         </div>
@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import comment from './common/comment'
+import comment from '../common/comment'
 
 export default {
     components: {
@@ -57,18 +57,17 @@ export default {
     },
     data() {
         return {
-            mvUrl: '',
-            Mvdetail: '',
-            aboutMv: [],
-            id: this.$route.query.mvId,
+            videoUrl: '',
+            videoDetail: '',
+            aboutVideo: [],
+            vid: this.$route.query.vid, //视频的ID
             total: 0,
-            content: '', //发布评论的内容
-            url: '/comment/mv',
-
+            content: '',
+            url: '/comment/video'
         }
     },
     methods: {
-        //发布mv评论
+        //发布视频评论
         comment() {
             let time = Date.now()
             if (window.localStorage.getItem('userInfo') === 'null') {
@@ -84,13 +83,13 @@ export default {
                         url: '/comment',
                         params: {
                             t: 1,
-                            type: 1,
-                            id: this.id,
+                            type: 5,
+                            id: this.vid,
                             content: this.content,
                             timestamp: time
                         }
                     }).then(res => {
-                        this.url = '/comment/mv?timestamp=' + time
+                        this.url = '/comment/video?timestamp=' + time
                         this.$message({
                             message: '评论成功，数据可能有延迟。请稍后刷新',
                             type: 'success',
@@ -107,48 +106,81 @@ export default {
                     })
                 }
             }
-
         },
+        pl() {
+            this.$axios({
+                method: 'get',
+                url: '/comment/video',
+                withCredentials: true, //关键
+                params: {
+                    id: this.vid
+                }
+            }).then(res => {
+                // this.videoUrl = res.data.urls[0].url
+                console.log(res)
+            })
+        },
+
         handleCurrentChange(val) {
             // console.log(`当前页: ${val}`);
             this.page = val
             this.getMvComment(this.id)
         },
-        //获取mv播放链接
-        getMvUrl(id) {
-            this.$axios.get('/mv/url?id=' + id).then(res => {
-                this.mvUrl = res.data.data.url
+        //获取视频url
+        getVideoUrl(vid) {
+            this.$axios({
+                method: 'get',
+                url: '/video/url',
+                withCredentials: true, //关键
+                params: {
+                    id: vid
+                }
+            }).then(res => {
+                this.videoUrl = res.data.urls[0].url
                 // console.log(res)
             })
         },
-
-        //获取mv详情
-        getMvDetail(id) {
-            this.$axios.get('/mv/detail?mvid=' + id).then(res => {
-                this.Mvdetail = res.data.data
+        //获取视频详情
+        getVideoDetail(vid) {
+            this.$axios({
+                method: 'get',
+                url: '/video/detail',
+                withCredentials: true, //关键
+                params: {
+                    id: vid
+                }
+            }).then(res => {
+                this.videoDetail = res.data.data
                 // console.log(res)
             })
         },
-        //获取相似mv
-        getAbout(id) {
-            this.$axios.get('/simi/mv?mvid=' + id).then(res => {
-                this.aboutMv = res.data.mvs
+        //获取相似视频
+        getAbout(vid) {
+            this.$axios({
+                method: 'get',
+                url: '/related/allvideo',
+                withCredentials: true, //关键
+                params: {
+                    id: vid
+                }
+            }).then(res => {
+                this.aboutVideo = res.data.data
                 // console.log(res)
-
             })
         },
-        //点击相关推荐
-        play(id) {
-            this.id = id
-            this.getMvUrl(id)
-            this.getAbout(id)
-            this.getMvDetail(id)
-        }
+        //点击相关推荐，更新mv
+        play(vid) {
+            this.vid = vid
+            this.getVideoUrl(this.vid)
+            this.getVideoDetail(this.vid)
+            this.getAbout(vid)
+        },
     },
     created() {
-        this.getMvUrl(this.id)
-        this.getMvDetail(this.id)
-        this.getAbout(this.id)
+        this.getVideoUrl(this.vid)
+        this.getVideoDetail(this.vid)
+        this.getAbout(this.vid)
+        // this.pl()
     }
 }
 </script>
@@ -178,10 +210,6 @@ export default {
 .left .title span:nth-child(3) {
     color: #4a5d7b;
     font-size: 0.75rem;
-}
-
-.left .addComment button:hover {
-    background-color: #f2f2f2;
 }
 
 .left .pl {
@@ -270,7 +298,7 @@ video {
 .right .item .content-wrap {
     flex: 1;
     margin-left: 10px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #666666;
 }
 

@@ -1,6 +1,6 @@
 <template>
 <div class="comment">
-    <slot name='songDetail'></slot>
+    <slot name='DetailSong'></slot>
     <div class="comment-wrap ">
         <p>精彩评论</p>
         <div class="comments-wrap" v-for="(item,i) in hotComment" :key="i">
