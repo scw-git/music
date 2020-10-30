@@ -14,7 +14,7 @@
             </div>
             <div class="other">
                 <span class="playall iconfont icon-play3" style="cursor:pointer" @click="playAll"> 播放全部</span>
-                <span class="collect iconfont icon-addfile"> 收藏({{playlistdetail.subscribedCount}})</span>
+                <span style="cursor:pointer" @click="collect" class="collect iconfont icon-addfile"> 收藏({{playlistdetail.subscribedCount}})</span>
                 <span class="share iconfont icon-share2"> 分享({{playlistdetail.shareCount}})</span>
             </div>
             <div class="tag">
@@ -55,11 +55,11 @@
             <el-tab-pane :label="`评论(${total})`" name="comment">
                 <!--发布评论-->
                 <div class="addComment">
-                    <textarea name="" id=""></textarea>
-                    <button>评论</button>
+                    <textarea name="" id="" @keydown.enter="comment" v-model="content"></textarea>
+                    <button @click="comment">评论</button>
                 </div>
                 <!--$event可以直接获取值，并赋值给data中的变量，不用绑定一个方法-->
-                <comment :id="id" url='/comment/playlist' @total="total=$event" />
+                <comment :id="id" :url='url' @total="total=$event" />
             </el-tab-pane>
 
         </el-tabs>
@@ -84,11 +84,90 @@ export default {
             songs: [], //歌单所有的歌
             isShow: true, //用来显示与隐藏简介的
             index: -1, //不能一开始就是0，会把第一个变成红色。用来记录当前播放歌曲的索引号，以便把它变成红色
-            id: this.$route.query.playListId,
-            total: 0
+            id: this.$route.query.playListId, //歌单ID
+            total: 0,
+            content: '',
+            url: '/comment/playlist'
+        }
+    },
+    watch: {
+        $route() { //相当于从小刷新了一遍,这个数据是接收从收藏歌单过来的
+            this.id = this.$route.query.playListId
+            this.songs = []
+            this.trackId = []
+            this.arrid = []
+            this.allid = ''
+            this.index = -1
+            this.getSongs()
+
+            // console.log(this.songs)
+            // console.log(this.$route.query.playListId)
         }
     },
     methods: {
+        //发布歌单评论
+        comment() {
+            let time = Date.now()
+            if (window.localStorage.getItem('userInfo') === 'null') {
+                this.$message({
+                    message: '登录才能评论哦！！',
+                    type: 'warning',
+                    offset: 80
+                })
+            } else {
+                if (this.content != '') {
+                    this.$axios({
+                        method: 'get',
+                        url: '/comment',
+                        params: {
+                            t: 1,
+                            type: 2,
+                            id: this.id,
+                            content: this.content,
+                            timestamp: time
+                        }
+                    }).then(res => {
+                        this.url = '/comment/playlist?timestamp=' + time
+                        this.$message({
+                            message: '评论成功，数据可能有延迟。请稍后刷新',
+                            type: 'success',
+                            offset: 80
+                        })
+                        this.content = ''
+                        // console.log(this.url)
+                    })
+                } else {
+                    this.$message({
+                        message: '写点东西吧！内容不能为空哦！！',
+                        type: 'warning',
+                        offset: 80
+                    })
+                }
+            }
+
+        },
+        //收藏歌单
+        collect() {
+            let time = Date.now()
+            this.$axios({
+                method: "get",
+                url: '/playlist/subscribe',
+                withCredentials: true, //关键
+                params: {
+                    t: 1,
+                    id: this.id,
+                    timestamp: time
+                }
+            }).then(res => {
+                this.$message({
+                    message: '收藏成功，数据同步可能有延迟。请稍后刷新！',
+                    type: 'success',
+                    offset: 80
+                });
+                // console.log(res)
+                this.$vue.$emit("onDetailPlayList", "ok")
+            })
+        },
         handleCurrentChange(val) {
             // console.log(`当前页: ${val}`);
             this.page = val
@@ -98,11 +177,14 @@ export default {
         play(id, i) {
             this.index = i //如果不加这个，第一个点击的不会变红
             this.$axios.get('/song/url?id=' + id).then(res => {
-                this.$parent.url = res.data.data[0].url
-                this.$parent.currentId = id
-                this.$parent.index = i //用来记录当前播放歌曲的索引号，以便把它变成红色
-                this.$parent.allSongsId = this.arrid
-                // console.log(res)
+                let url = res.data.data[0].url
+                this.$vue.$emit('CloudMusicInfo', {
+                    url: url,
+                    currentId: id,
+                    index: i, //用来记录当前播放歌曲的索引号，以便把它变成红色
+                    allSongsId: this.arrid,
+                })
+
             })
         },
         //播放全部
@@ -119,6 +201,24 @@ export default {
                 }
             })
         },
+        getSongs() {
+            this.$axios.get('/playlist/detail?id=' + this.id)
+                .then(res => {
+                    this.playlistdetail = res.data.playlist //歌单详情内容
+                    // console.log(res)
+                    this.trackId = res.data.playlist.trackIds //根据trackids获取歌曲，直接获取是不全的。没有登录
+                    for (let i = 0; i < this.trackId.length; i++) {
+                        this.arrid.push(this.trackId[i].id) //把trackids放入数组中
+                    }
+                    this.allid = this.arrid.join() //把歌曲trackids转换成字符串
+                    this.$axios.get('/song/detail?ids=' + this.allid).then(res => { //根据trackids获取歌曲内容
+                        this.songs = res.data.songs
+                        // console.log(this.songs)
+                        // console.log(this.allid)
+                    })
+                    // console.log(this.arrid)
+                })
+        }
     },
     mounted() {
         this.$vue.$on('index', (res) => { //接收一个函数，res中保存传过来的值
@@ -126,21 +226,14 @@ export default {
         })
     },
     created() {
-        this.$axios.get('/playlist/detail?id=' + this.id)
-            .then(res => {
-                this.playlistdetail = res.data.playlist //歌单详情内容
-                // console.log(res)
-                this.trackId = res.data.playlist.trackIds //根据trackids获取歌曲，直接获取是不全的。没有登录
-                for (let i = 0; i < this.trackId.length; i++) {
-                    this.arrid.push(this.trackId[i].id) //把trackids放入数组中
-                }
-                this.allid = this.arrid.join() //把歌曲trackids转换成字符串
-                this.$axios.get('/song/detail?ids=' + this.allid).then(res => { //根据trackids获取歌曲内容
-                    this.songs = res.data.songs
-                    console.log(this.songs)
-                })
-                // console.log(this.arrid)
-            })
+        this.getSongs()
+        console.log(this.$route.query.playListId)
+
+        // this.$axios.get('/song/detail?ids=' + this.id).then(res => { //根据trackids获取歌曲内容
+        //     this.songs = res.data.songs
+        //     console.log(res.data.songs)
+        // })
+        // console.log(this.$route.query.playListId)
     }
 }
 </script>
@@ -174,6 +267,10 @@ export default {
     outline: none;
     cursor: pointer;
     border-radius: 5px;
+}
+
+.addComment button:hover {
+    background-color: #f2f2f2;
 }
 </style><style scoped>
 .comment {
@@ -231,8 +328,13 @@ export default {
 .other .playall {
     padding: 5px 10px;
     border-radius: 3px;
-    background-color: rgb(198, 47, 47);
+    background-color: #ec4141;
     color: white;
+}
+
+.other .playall:hover {
+    background-color: rgb(198, 47, 47);
+
 }
 
 .other .collect {
@@ -240,6 +342,10 @@ export default {
     border-radius: 3px;
     border: 1px solid black;
     color: rgb(102, 102, 102);
+}
+
+.other .collect:hover {
+    background-color: #e2e2e2;
 }
 
 .other .share {

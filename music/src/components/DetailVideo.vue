@@ -12,11 +12,11 @@
         </div>
         <!--发布评论-->
         <div class="addComment">
-            <textarea name="" id=""></textarea>
-            <button>评论</button>
+            <textarea name="" id="" @keydown.enter="comment" v-model="content"></textarea>
+            <button @click="comment">评论</button>
         </div>
         <!--评论-->
-        <comment :id="vid" url='/comment/video' @total='total=$event' />
+        <comment :id="vid" :url='url' @total='total=$event' />
     </div>
     <div class="right">
         <h3>视频介绍</h3>
@@ -62,9 +62,51 @@ export default {
             aboutVideo: [],
             vid: this.$route.query.vid, //视频的ID
             total: 0,
+            content: '',
+            url: '/comment/video'
         }
     },
     methods: {
+        //发布视频评论
+        comment() {
+            let time = Date.now()
+            if (window.localStorage.getItem('userInfo') === 'null') {
+                this.$message({
+                    message: '登录才能评论哦！！',
+                    type: 'warning',
+                    offset: 80
+                })
+            } else {
+                if (this.content != '') {
+                    this.$axios({
+                        method: 'get',
+                        url: '/comment',
+                        params: {
+                            t: 1,
+                            type: 5,
+                            id: this.vid,
+                            content: this.content,
+                            timestamp: time
+                        }
+                    }).then(res => {
+                        this.url = '/comment/video?timestamp=' + time
+                        this.$message({
+                            message: '评论成功，数据可能有延迟。请稍后刷新',
+                            type: 'success',
+                            offset: 80
+                        })
+                        this.content = ''
+                        // console.log(this.url)
+                    })
+                } else {
+                    this.$message({
+                        message: '写点东西吧！内容不能为空哦！！',
+                        type: 'warning',
+                        offset: 80
+                    })
+                }
+            }
+        },
         pl() {
             this.$axios({
                 method: 'get',

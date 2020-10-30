@@ -12,11 +12,11 @@
         </div>
         <!--发布评论-->
         <div class="addComment">
-            <textarea name="" id=""></textarea>
-            <button>评论</button>
+            <textarea name="" id="" v-model="content" @keydown.enter="comment"></textarea>
+            <button @click="comment">评论</button>
         </div>
         <!--评论-->
-        <comment :id="id" url='/comment/mv' @total='total=$event' />
+        <comment :id="id" :url='url' @total='total=$event' />
     </div>
     <div class="right">
         <h3>MV介绍</h3>
@@ -62,9 +62,53 @@ export default {
             aboutMv: [],
             id: this.$route.query.mvId,
             total: 0,
+            content: '', //发布评论的内容
+            url: '/comment/mv',
+
         }
     },
     methods: {
+        //发布mv评论
+        comment() {
+            let time = Date.now()
+            if (window.localStorage.getItem('userInfo') === 'null') {
+                this.$message({
+                    message: '登录才能评论哦！！',
+                    type: 'warning',
+                    offset: 80
+                })
+            } else {
+                if (this.content != '') {
+                    this.$axios({
+                        method: 'get',
+                        url: '/comment',
+                        params: {
+                            t: 1,
+                            type: 1,
+                            id: this.id,
+                            content: this.content,
+                            timestamp: time
+                        }
+                    }).then(res => {
+                        this.url = '/comment/mv?timestamp=' + time
+                        this.$message({
+                            message: '评论成功，数据可能有延迟。请稍后刷新',
+                            type: 'success',
+                            offset: 80
+                        })
+                        this.content = ''
+                        // console.log(this.url)
+                    })
+                } else {
+                    this.$message({
+                        message: '写点东西吧！内容不能为空哦！！',
+                        type: 'warning',
+                        offset: 80
+                    })
+                }
+            }
+
+        },
         handleCurrentChange(val) {
             // console.log(`当前页: ${val}`);
             this.page = val
@@ -89,7 +133,7 @@ export default {
         getAbout(id) {
             this.$axios.get('/simi/mv?mvid=' + id).then(res => {
                 this.aboutMv = res.data.mvs
-                console.log(res)
+                // console.log(res)
 
             })
         },
@@ -134,6 +178,10 @@ export default {
 .left .title span:nth-child(3) {
     color: #4a5d7b;
     font-size: 0.75rem;
+}
+
+.left .addComment button:hover {
+    background-color: #f2f2f2;
 }
 
 .left .pl {

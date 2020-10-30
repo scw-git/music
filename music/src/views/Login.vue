@@ -7,7 +7,7 @@
         <form @submit.prevent='login'>
             <div class="info">
                 <div class="number"><input required v-model="phone" type="text" placeholder="请输入手机号"></div>
-                <div class="password"><input required @keydown.enter="login" v-model="password" type="text" placeholder="请输入密码"></div>
+                <div class="password"><input required @keydown.enter="login" v-model="password" type="password" placeholder="请输入密码"></div>
             </div>
             <div class="btn"><button type="submit">登录</button></div>
         </form>
@@ -69,9 +69,13 @@ export default {
                     this.userInfo = res.data.profile
                     // 把用户信息传到header组件中
                     this.$vue.$emit('userInfo', this.userInfo)
+                    this.$vue.$emit('loginStatus', true)
+                    this.phone = ''
+                    this.password = ''
                     this.close() //关闭登录框
+
                 }
-                console.log(res)
+                // console.log(res)
             })
 
         }

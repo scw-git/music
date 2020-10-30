@@ -22,7 +22,10 @@
             <span class="name">by {{item.data.creator.nickname}}</span>
         </div>
     </div>
-
+    <div class="pager">
+        <span class="up iconfont icon-left2" :class="{ban:offset==0}" @click="up"></span>
+        <span class="next iconfont icon-right1" @click="next"></span>
+    </div>
 </div>
 </template>
 
@@ -32,19 +35,42 @@ export default {
         return {
             category: [], //获取视频分类列表
             group: [], //获取视频标签列表
-            tag: '现场',
-            id: '58100', //当前选中的标签或分类的ID,默认‘现场’的视频
+            tag: '舞蹈',
+            id: '1101', //当前选中的标签或分类的ID,默认‘现场’的视频
             videoDetail: [], //获取一个标签或分类下的视频
+            offset: 0
         }
     },
     watch: {
         id() {
+
             this.getVideoDetail()
             // console.log(this.id)
-        }
+        },
     },
     methods: {
+        up() { //上一页
+            if (this.offset == 0) {
+                this.$message({
+                    message: '已经是第一页了哦！！',
+                    type: 'warning',
+                    offset: 100
+                });
+            } else {
+                this.offset = this.offset - 8
+                this.getVideoDetail()
+            }
+        },
+        next() {
+            this.offset = this.offset + 8
+            this.getVideoDetail()
+        },
         toVideoDetail(vid) { //跳转到视频详情页
+            window.sessionStorage.setItem('VideoInfo', JSON.stringify({
+                offset: this.offset,
+                tag: this.tag,
+                id: this.id
+            }))
             // console.log(vid)
             this.$router.push({
                 path: '/DetailVideo',
@@ -60,7 +86,7 @@ export default {
                 withCredentials: true, //关键
                 params: {
                     id: this.id,
-                    offset: 0
+                    offset: this.offset
                 }
             }).then(res => {
                 // this.mvids.push(res.data.datas[i].data.vid)
@@ -69,6 +95,7 @@ export default {
             })
         },
         changeTag(name, id) { //切换不同的分类
+            this.offset = 0
             this.tag = name
             this.id = id
         },
@@ -85,15 +112,32 @@ export default {
             this.$refs.group.style.display = 'none'
             this.$refs.cover.style.display = 'none'
         },
+        getStatus() { //从sessionstorage中获取上次保存的状态
+            if (window.sessionStorage.getItem('VideoInfo')) {
+                let data = JSON.parse(window.sessionStorage.getItem('VideoInfo'))
+                this.tag = data.tag
+                this.offset = data.offset
+                this.id = data.id
+            }
+        }
     },
     created() {
+        if (window.localStorage.getItem('userInfo') === 'null') {
+            this.$message({
+                message: '该功能需要登录哦！',
+                type: 'warning',
+                offset: 80
+            })
+        }
+        this.getStatus()
         this.$axios({ //获取视频分类列表
             method: 'get',
             url: '/video/category/list',
             withCredentials: true, //关键
+
         }).then(res => {
             this.category = res.data.data
-            // console.log(this.category)
+            console.log(this.category)
         })
         this.$axios({ //获取视频标签列表
             method: 'get',
@@ -108,8 +152,8 @@ export default {
             withCredentials: true, //关键
             method: 'get',
             params: {
-                id: 58100,
-                offset: 0
+                id: this.id,
+                offset: this.offset
             }
         }).then(res => {
             // console.log(res)
@@ -250,6 +294,43 @@ export default {
                 color: rgb(155, 155, 155);
                 font-size: 0.8rem;
             }
+        }
+    }
+
+    .pager {
+        display: flex;
+        justify-content: center;
+        cursor: pointer;
+
+        .up {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #c62f2f;
+            color: white;
+            margin-right: 20px;
+            border-radius: 5px;
+
+            &:hover {
+                background-color: rgb(226, 32, 32);
+            }
+        }
+
+        .next {
+            display: inline-block;
+            padding: 5px 10px;
+            color: white;
+            border-radius: 5px;
+            background-color: #c62f2f;
+
+            &:hover {
+                background-color: rgb(226, 32, 32);
+            }
+
+        }
+
+        .ban {
+            cursor: default;
+            color: rgb(216, 110, 110);
         }
     }
 

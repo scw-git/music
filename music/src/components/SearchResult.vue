@@ -7,24 +7,7 @@
         <el-tabs v-model="activeName">
             <!--单曲部分-->
             <el-tab-pane label="单曲" name="songs">
-                <table class="el-table ">
-                    <thead>
-                        <th>#</th>
-                        <th>音乐标题</th>
-                        <th>歌手</th>
-                        <th>专辑名</th>
-                        <th>时长</th>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(item,i) in songs" :key="i" @dblclick="play(item.id,i)" :class="{red:index==i}">
-                            <td>{{i+1|formatNum}}</td>
-                            <td>{{item.name}} <span v-if="item.mvid!=0" class="iconfont icon-bofanganniu btn" @click="toDetailMv(item.mvid)"></span></td>
-                            <td>{{item.artists[0].name}}</td>
-                            <td>{{item.album.name}}</td>
-                            <td>{{item.duration |formatDuration}}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <song-list :songs='songs' @playInfo='playInfo' />
                 <!--分页器-->
                 <div class="fy" v-if="total!=0">
                     <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
@@ -79,21 +62,47 @@
                     </el-pagination>
                 </div>
             </el-tab-pane>
-            <el-tab-pane label="专辑" name="fourth">专辑</el-tab-pane>
+            <el-tab-pane label="视频" name="video">
+                <!-- 视频-->
+                <div class="wypublish">
+                    <div class="items">
+                        <div class="item" v-for="(item,i) in video" :key="i" @click="toDetailVideo(item.vid)">
+                            <div class="img-wrap">
+                                <img :src="item.coverUrl" alt="">
+                                <div class="cover">
+                                    <span class="iconfont icon-play2"></span>
+                                    <span>{{item.playTime |formatPlayCount}}</span>
+                                </div>
+                            </div>
+                            <div class="name">{{item.title}}</div>
+                        </div>
+                    </div>
+                </div>
+                <!--分页器-->
+                <div class="fy" v-if="total!=0">
+                    <el-pagination background layout="prev, pager, next" :total="total" @current-change="handleCurrentChange" :page-size="limit" :current-page='page'>
+                    </el-pagination>
+                </div>
+            </el-tab-pane>
         </el-tabs>
     </div>
 </div>
 </template>
 
 <script>
+import songList from './common/songList'
 export default {
+    components: {
+        songList
+    },
     data() {
         return {
             activeName: 'songs', //用于绑定默认显示哪个（现在默认显示第一个）
             total: 0, //歌曲总数
             songs: [], //歌曲
             playlists: [], //歌单
-            mv: [], //视频
+            mv: [], //MV
+            video: [], //视频
             page: 1,
             limit: 30,
             name: '', //切换歌曲、歌单、mv时显示不同内容
@@ -106,8 +115,14 @@ export default {
             this.index = res
             // console.log('fdgggs111')
         })
+
     },
     methods: {
+        playInfo(res) { //接收从songLIst传来的值
+            this.index = res.i
+            this.play(res.id, res.i)
+            // console.log(this.index)
+        },
         handleCurrentChange(val) {
             // console.log(`当前页: ${val}`);
             this.page = val
@@ -117,6 +132,8 @@ export default {
                 this.getPlayList() //更新歌单
             } else if (this.activeName == 'mv') {
                 this.getMv() //更新mv
+            } else if (this.activeName == 'video') {
+                this.getVideo()
             }
 
         },
@@ -129,6 +146,16 @@ export default {
                 }
             })
         },
+        //  跳转到视频详情
+        toDetailVideo(vid) {
+            this.$router.push({
+                path: '/DetailVideo',
+                query: {
+                    vid: vid
+                }
+            })
+        },
+        //  跳转到歌单详情
         toDetail(id) {
             this.$router.push({
                 path: '/DetailPlayList',
@@ -196,7 +223,22 @@ export default {
             }).then(res => {
                 this.total = res.data.result.mvCount
                 this.mv = res.data.result.mvs
-
+                // console.log(res)
+            })
+        },
+        getVideo() { //获取视频
+            this.$axios({
+                method: 'get',
+                url: '/search',
+                params: {
+                    keywords: this.$route.query.q,
+                    type: 1014,
+                    limit: 28,
+                    offset: (this.page - 1) * this.limit
+                }
+            }).then(res => {
+                this.total = res.data.result.videoCount
+                this.video = res.data.result.videos
                 // console.log(res)
             })
         }
@@ -224,6 +266,9 @@ export default {
                 this.name = '个歌单'
             } else if (this.activeName == 'mv') {
                 this.getMv() //调用mv的
+                this.name = '个MV'
+            } else if (this.activeName == 'video') {
+                this.getVideo()
                 this.name = '个视频'
             }
 
@@ -267,36 +312,7 @@ export default {
 
 .content>>>.el-tabs__item {
     padding: 0 30px;
-    font-size: 1.1rem;
-}
-
-.el-table {
-    border-collapse: collapse
-}
-
-.el-table td {
-    border: 0;
-}
-
-.el-table td,
-.el-table th {
-    padding: 25px 15px 25px 25px;
-}
-
-.el-table tr:nth-child(2n) {
-    background-color: rgb(249, 249, 249);
-}
-
-.el-table tr:hover {
-    background-color: rgb(240, 240, 240);
-
-}
-
-.el-table .btn {
-    font-size: 0.5rem;
-    color: red;
-    border: 1px solid red;
-    cursor: pointer;
+    font-size: 1rem;
 }
 
 .content>>>.el-pagination.is-background .el-pager li:not(.disabled) {

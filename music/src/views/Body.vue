@@ -5,28 +5,50 @@
         <p>推荐</p>
         <ul class="body-items">
             <li>
-                <router-link to='/tab'><span class="iconfont icon-yinyue"></span>发现音乐</router-link>
+                <router-link to='/tab'><span class="iconfont icon-yinyue" style="font-size:0.9rem"></span>发现音乐</router-link>
             </li>
             <li>
-                <router-link to='/tabVideo'><span class="iconfont icon-shipin"></span>视频</router-link>
+                <router-link to='/tabVideo'><span class="iconfont icon-shipin" style="font-size:1.1rem"></span>视频</router-link>
             </li>
         </ul>
         <p>我的音乐</p>
         <ul class="body-items">
-            <li>
-                <router-link to='/1'><span class="iconfont icon-Cloud2"></span>音乐云盘</router-link>
+            <li v-if="loginStatus">
+                <router-link to='/CloudMusic'><span class="iconfont icon-cloud1"></span>音乐云盘</router-link>
+            </li>
+            <li v-if="loginStatus">
+                <router-link to='/MyCollect'><span class="iconfont icon-wodeshoucang"></span>我的收藏</router-link>
             </li>
         </ul>
         <p>创建的歌单</p>
         <ul class="body-items">
-            <li>
-                <router-link to='/2'><span class="iconfont icon-aixin-xian"></span>我喜欢的音乐</router-link>
+            <li v-if="loginStatus">
+                <router-link to='/FavMusic'><span class="iconfont icon-aixin-xian"></span>我喜欢的音乐</router-link>
             </li>
         </ul>
-        <p>收藏的歌单</p>
-        <ul class="body-items">
 
-        </ul>
+        <el-collapse class="body-items" v-if="loginStatus">
+            <el-collapse-item title="收藏的歌单" name="1">
+
+                <div class="collect" v-for="(item,i) in collectPlayList" :key="i">
+                    <span class="iconfont icon-delete2" @click="del(item.id)"></span>
+                    <router-link exact class="collectPlayList" :to="{path:'/CollectPlayList',query:{playListId:item.id}}"><span class="iconfont icon-icon--3 collectSpan"></span>{{item.name}}</router-link>
+                </div>
+            </el-collapse-item>
+            <!-- <li class="collectPlayList" v-for="(item,i) in collectPlayList" :key="i" @click="toDetailPlayList(item.id)">
+                <span class="iconfont icon-icon--3"></span>{{item.name}}
+            </li>-->
+        </el-collapse>
+        <!--当前播放歌曲的显示窗口-->
+        <div class="currentPlaySong" v-if="url" @click="toSongdetail(currentId)">
+            <img :src="currentSongDetail.al.picUrl" alt="">
+            <div class="songContent">
+                <p>{{currentSongDetail.name}}</p>
+                <p>{{currentSongDetail.ar[0].name}}</p>
+            </div>
+            <span class="iconfont icon-shuangjiantou-shang" v-if="isShow"></span>
+            <span class="iconfont icon-shuangjiantou-xia" v-if="!isShow"></span>
+        </div>
     </div>
 
     <!--中间内容-->
@@ -38,16 +60,7 @@
         <!--用来与底部留出一些距离-->
         <div class="main-div"></div>
     </div>
-    <!--当前播放歌曲的显示窗口-->
-    <div class="currentPlaySong" v-if="url" @click="toSongdetail(currentId)">
-        <img :src="currentSongDetail.al.picUrl" alt="">
-        <div class="songContent">
-            <p>{{currentSongDetail.name}}</p>
-            <p>{{currentSongDetail.ar[0].name}}</p>
-        </div>
-        <span class="iconfont icon-shuangjiantou-shang" v-if="isShow"></span>
-        <span class="iconfont icon-shuangjiantou-xia" v-if="!isShow"></span>
-    </div>
+
     <!--底下播放器-->
     <div class="play">
         <!--按钮-->
@@ -98,6 +111,8 @@ export default {
             currentSongDetail: [], //当前播放歌曲的详细信息
             totalDuration: 0, //歌曲的总时长
             index: -1, //用来记录当前播放歌曲的索引号，以便把它变成红色
+            loginStatus: false, //记录登录状态
+            collectPlayList: [], //登录后获取收藏的歌单，从第二个开始，第一个是最喜欢的音乐
 
         }
     },
@@ -116,7 +131,17 @@ export default {
             this.$vue.$emit('isPlay', this.isPlay)
         },
     },
+    updated() {
+
+    },
     mounted() {
+        this.$vue.$on('onDetailPlayList', res => { //接收DetailPlayList传过来收藏成功的消息
+            if (res == 'ok') { //刷新收藏列表
+                this.getCollectPlayList()
+            }
+            // console.log('88888888')
+        })
+        this.judgeLoginStatus()
         //接受 TopList NewMusic FindMusic 传过来的数据
         this.$vue.$on('playData', (res) => {
             this.url = res.url
@@ -125,8 +150,94 @@ export default {
             this.index = res.index
             // console.log(res.index)
         })
+        //接收CloudMusic传过来的值
+        this.$vue.$on('CloudMusicInfo', (res => {
+            this.url = res.url
+            this.currentId = res.currentId
+            this.allSongsId = res.allSongsId
+            this.index = res.index
+            // console.log(res)
+        }))
+    },
+    created() {
+        this.getCollectPlayList()
     },
     methods: {
+        //取消收藏
+        del(id) {
+            let time = Date.now() //必须是局部的，全局的模版生成时已经生成。只有刷新时才改变
+            this.$confirm('确定删除该歌单吗？', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                // console.log(id)
+                this.$axios({
+                    method: "get",
+                    url: '/playlist/subscribe',
+                    withCredentials: true, //关键
+                    params: {
+                        t: 2,
+                        id: id,
+                        timestamp: time
+                    }
+                }).then(res => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功! 数据会有延迟，请稍后刷新！',
+                        offset: 80
+                    });
+                    this.getCollectPlayList()
+                })
+            })
+        },
+        toDetailPlayList(id) {
+            this.$router.push({
+                path: '/DetailPlayList',
+                query: {
+                    playListId: id
+                }
+            })
+        },
+        //登录后获取收藏歌单
+        getCollectPlayList() {
+            let time = Date.now()
+            if (window.localStorage.getItem('userInfo') !== 'null') {
+                this.$axios({
+                    url: '/user/playlist',
+                    method: 'get',
+                    withCredentials: true, //关键,用来解决跨域的
+                    params: {
+                        uid: JSON.parse(window.localStorage.getItem('userInfo')).userId,
+                        timestamp: time
+                    }
+                }).then(res => {
+                    this.collectPlayList = res.data.playlist.slice(1)
+                    console.log(this.collectPlayList)
+                })
+            }
+        },
+        // 判断是否登录状态
+        judgeLoginStatus() {
+            if (window.localStorage.getItem('userInfo') !== 'null') { //必须是字符串的null
+                this.loginStatus = true
+            } else {
+                this.loginStatus = false
+            }
+            this.$vue.$on('loginStatus', res => {
+                if (res) {
+                    this.loginStatus = true
+                    // console.log('status true')
+                } else {
+                    this.loginStatus = false
+                    this.$router.push({
+                        path: '/tab/FindMusic'
+                    })
+
+                }
+                // console.log(this.loginStatus)
+            })
+        },
         //跳转到歌曲详情页面
         toSongdetail(id) {
             this.isShow = !this.isShow
@@ -253,18 +364,21 @@ export default {
 .aside {
     width: 13.125rem;
     font-size: 0.9rem;
-    height: 100%;
     position: fixed;
     top: 3.75rem;
     left: 0;
-    background-color: #f5f5f7;
+    bottom: 110px;
+    overflow: auto;
+    background-color: #ffffff;
     border-right: 1px solid #e1e1e2;
+
 }
 
 .body .aside>p {
-    margin: 15px;
-    margin-bottom: 20px;
-    color: #636363;
+    margin: 10px 15px;
+    margin-bottom: 18px;
+    color: #aaaaaa;
+    font-size: 0.8rem;
 }
 
 .body-items {
@@ -273,6 +387,17 @@ export default {
 
 .body-items .icon-shipin {
     font-size: 1.25rem;
+}
+
+.body-items .collectPlayList {
+    padding: 10px 15px 10px 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    -webkit-text-overflow: ellipsis;
+    -moz-text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
 }
 
 .body-items a {
@@ -325,11 +450,15 @@ export default {
     background-color: #f5f5f7;
 }
 
+.currentPlaySong:hover img {
+    filter: blur(1px)
+}
+
 .currentPlaySong img {
     width: 56px;
     margin: 7px;
     border-radius: 5px;
-    filter: blur(1px)
+
 }
 
 .currentPlaySong span {
@@ -387,6 +516,7 @@ export default {
 
 .play .play-btn {
     margin-left: 20px;
+
 }
 
 .play .play-btn span:nth-child(2) {
@@ -461,5 +591,30 @@ audio {
     border-radius: none;
     outline: none;
 
+}
+
+.aside .el-collapse-item__header {
+    line-height: 0;
+    border: 0;
+    color: #aaaaaa;
+    height: 0;
+    padding: 18px 15px;
+}
+
+.aside .collectSpan {
+    margin-right: 10px;
+}
+
+.body-items .collect {
+    display: flex;
+}
+
+.body-items .collect>span {
+    padding: 10px 10px 10px 30px;
+    cursor: pointer;
+}
+
+.body-items .collect>span:hover {
+    color: #c62f2f;
 }
 </style>

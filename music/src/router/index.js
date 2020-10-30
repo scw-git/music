@@ -12,6 +12,10 @@ import tabVideo from '../components/common/tabVideo.vue'
 import TopList from '../components/TopList.vue'
 import Video from '../components/Video.vue'
 import DetailVideo from '../components/DetailVideo.vue'
+import CloudMusic from '../components/CloudMusic.vue'
+import MyCollect from '../components/MyCollect.vue'
+import FavMusic from '../components/FavMusic.vue'
+import CollectPlayList from '../components/CollectPlayList.vue'
 
 Vue.use(VueRouter)
 
@@ -23,15 +27,16 @@ const routes = [{
         path: '/tabVideo',
         component: tabVideo,
         redirect: '/tabVideo/Video',
-        meta: {
-            keepAlive: true
-        },
+        // meta: {
+        //     keepAlive: true
+        // },
         children: [{
             path: 'Video',
             component: Video
         }, {
             path: 'NewMv',
-            component: NewMv
+            component: NewMv,
+            // meta: { keepAlive: true }
         }, ]
     },
     {
@@ -52,18 +57,24 @@ const routes = [{
             }, {
                 path: 'TopList',
                 component: TopList
+            }, {
+                path: 'NewMv',
+                component: NewMv,
             },
         ]
     },
     {
         path: '/SearchResult',
-        component: SearchResult
+        component: SearchResult,
+        // meta: {
+        //     keepAlive: true
+        // }
     }, {
         path: '/DetailPlayList',
         component: DetailPlayList,
-        meta: {
-            keepAlive: true
-        }
+        // meta: {
+        //     keepAlive: true
+        // }
     }, {
         path: '/DetailMv',
         component: () =>
@@ -75,6 +86,28 @@ const routes = [{
     {
         path: '/DetailVideo',
         component: DetailVideo
+    },
+    {
+        path: '/CloudMusic',
+        component: CloudMusic
+    }, {
+        path: '/MyCollect',
+        component: MyCollect
+    }, {
+        path: '/FavMusic',
+        component: FavMusic,
+        // redirect: '/FavMusic/DetailPlayList',
+        children: [{
+            path: 'DetailPlayList',
+            component: DetailPlayList,
+        }, ]
+    }, {
+        path: '/CollectPlayList',
+        component: CollectPlayList,
+        children: [{
+            path: 'DetailPlayList',
+            component: DetailPlayList,
+        }, ]
     },
 
 

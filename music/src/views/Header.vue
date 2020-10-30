@@ -12,7 +12,7 @@
         <div class="login" v-if="userInfo!==null" style="cursor:default">
             <img :src="userInfo.avatarUrl" alt="">
             {{userInfo.nickname}}
-            <span class="iconfont icon-tuichu1 out" @click="outLogin"> 退出</span>
+            <span class="iconfont icon-tuichu1 out" @click="loginout"> 退出</span>
         </div>
         <div class="login " @click="login" v-if="userInfo===null">
             <img class="iconfont icon-login_zhanghu" src="" alt="">
@@ -39,20 +39,25 @@ export default {
         //不用转成对象，因为传过来的就是对象。但从localStorage中读取的要转。
         this.$vue.$on('userInfo', (res => {
             this.userInfo = res
-            console.log(res)
+            // console.log(res)
         }))
 
     },
     methods: {
         //退出登录
-        outLogin() {
+        loginout() {
             //要用null，否则会有问题
-            this.userInfo = null
-            window.localStorage.setItem('userInfo', null)
+            this.$axios.get('logout').then(res => {
+                this.userInfo = null
+                window.localStorage.setItem('userInfo', null)
+                window.localStorage.setItem('musicCookie', null)
+                this.$vue.$emit("loginStatus", false)
+            })
+
         },
         toFindMusic() {
             this.$router.push({
-                path: '/FindMusic',
+                path: '/tab/FindMusic',
 
             })
         },

@@ -1,7 +1,7 @@
 <template>
 <!-- 精彩MV-->
 <div class="wypublish">
-    <h2 class="title" v-if="titleShow">精彩MV <router-link to='/tab/NewMv'><span></span>更多></router-link>
+    <h2 class="title" v-if="titleShow">精彩MV <router-link to='/tabVideo/NewMv'><span></span>更多></router-link>
     </h2>
     <div class="items">
         <div class="item" v-for="(item,i) in wypublish" :key="i" @click="toDetailMv(item.id)">

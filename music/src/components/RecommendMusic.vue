@@ -76,6 +76,7 @@ export default {
             this.getTitle()
             this.getPalyList()
             this.page = 1
+            window.sessionStorage.setItem('RecommendMusicTag', this.tag)
         }
     },
     methods: {
@@ -105,10 +106,7 @@ export default {
             }).then(res => {
                 this.titlelist = res.data.playlists[1]
             })
-            this.$axios.get('/playlist/catlist').then(res => {
-
-                console.log(res)
-            })
+            this.$axios.get('/playlist/catlist').then(res => {})
         },
         //歌单列表
         getPalyList() {
@@ -122,18 +120,19 @@ export default {
                 }
             }).then(res => {
                 this.lists = res.data.playlists
-
                 this.total = res.data.total
-
-                // console.log(res)
             })
         }
     },
     created() {
+        if (window.sessionStorage.getItem('RecommendMusicTag') !== 'null') {
+            this.tag = window.sessionStorage.getItem('RecommendMusicTag')
+        }
         //头部精品歌单
         this.getTitle()
         //歌单列表
         this.getPalyList()
+
     }
 }
 </script>

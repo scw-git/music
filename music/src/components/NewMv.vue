@@ -61,7 +61,7 @@ export default {
             order: '上升最快',
             limit: 28,
             page: 1,
-            total: 100,
+            total: 0,
             mv: [],
         }
     },
@@ -74,6 +74,13 @@ export default {
         },
         //  跳转到mv详情
         toDetailMV(id) {
+            //保存当前状态
+            window.sessionStorage.setItem('NewMvInfo', JSON.stringify({
+                area: this.area,
+                type: this.type,
+                order: this.order,
+                page: this.page
+            }))
             this.$router.push({
                 path: '/DetailMv',
                 query: {
@@ -98,10 +105,20 @@ export default {
                     if (res.data.count) {
                         this.total = res.data.count
                     }
-                    console.log(res.data)
+                    // console.log(res.data)
                 }
             })
-        }
+        },
+        //获取保存的状态
+        getStatus() {
+            if (window.sessionStorage.getItem('NewMvInfo')) {
+                let data = JSON.parse(window.sessionStorage.getItem('NewMvInfo'))
+                this.area = data.area
+                this.type = data.type
+                this.order = data.order
+                this.page = data.page
+            }
+        },
     },
     watch: {
         area() {
@@ -121,6 +138,7 @@ export default {
         },
     },
     created() {
+        this.getStatus()
         this.getMv()
     }
 }

@@ -20,8 +20,18 @@
         </div>
     </div>
     <div class="bottom">
+
         <!--左边的评论-->
-        <comment class="comment" :id='id' url='/comment/music'></comment>
+
+        <comment class="comment" :id='id' :url='url'>
+            <template slot='songDetail'>
+                <!--发布评论-->
+                <div class="addComment">
+                    <textarea name="" id="" @keydown.enter="comment" v-model="content"></textarea>
+                    <button @click="comment">评论</button>
+                </div>
+            </template>
+        </comment>
         <!--右边相关推荐-->
         <div class="about">
             <div class="contain" v-if="simiPlayList!=0">
@@ -72,10 +82,12 @@ export default {
             simiSong: [],
             id: '',
             currentSongDetail: '',
-            isPlay: true, //有个bug,先设置为false时。要点击两次，黑胶才会转
+            isPlay: false, //有个bug,先设置为false时。要点击两次，黑胶才会转
             currentTime: '', //当前播放时间
             lyrObj: {}, //每句歌词对应的时间 (key:时间 value:歌词)
             allKeys: [], //存储了所有歌词对应的时间（只有时间）
+            url: '/comment/music',
+            content: ''
         }
     },
     updated() {
@@ -113,12 +125,53 @@ export default {
     created() {
         this.id = this.$route.query.songId
         this.getAbout()
-
+        this.getLyric()
         this.getSimilar()
         this.getContain()
         // console.log(this.$route.query.songId)
     },
     methods: {
+        //发布歌曲评论
+        comment() {
+            let time = Date.now()
+            if (window.localStorage.getItem('userInfo') === 'null') {
+                this.$message({
+                    message: '登录才能评论哦！！',
+                    type: 'warning',
+                    offset: 80
+                })
+            } else {
+                if (this.content != '') {
+                    this.$axios({
+                        method: 'get',
+                        url: '/comment',
+                        params: {
+                            t: 1,
+                            type: 0,
+                            id: this.id,
+                            content: this.content,
+                            timestamp: time
+                        }
+                    }).then(res => {
+                        this.url = '/comment/music?timestamp=' + time
+                        this.$message({
+                            message: '评论成功，数据可能有延迟。请稍后刷新',
+                            type: 'success',
+                            offset: 80
+                        })
+                        this.content = ''
+                        // console.log(this.url)
+                    })
+                } else {
+                    this.$message({
+                        message: '写点东西吧！内容不能为空哦！！',
+                        type: 'warning',
+                        offset: 80
+                    })
+                }
+            }
+
+        },
         handleCurrentChange(val) {
             // console.log(`当前页: ${val}`);
             this.page = val
@@ -163,6 +216,7 @@ export default {
                 this.img = this.currentSongDetail.al.picUrl
                 this.song = this.currentSongDetail.name
                 this.singer = this.currentSongDetail.ar[0].name
+                // console.log(res)
             })
         },
         //点击了包含这首歌的歌单，跳转到歌单详情

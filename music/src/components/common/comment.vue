@@ -1,6 +1,6 @@
 <template>
 <div class="comment">
-
+    <slot name='songDetail'></slot>
     <div class="comment-wrap ">
         <p>精彩评论</p>
         <div class="comments-wrap" v-for="(item,i) in hotComment" :key="i">
@@ -68,7 +68,7 @@ export default {
         handleCurrentChange(val) {
             this.page = val
             this.getComment()
-            console.log(`当前页: ${this.page}`);
+            // console.log(`当前页: ${this.page}`);
         },
         //获取歌曲评论
         getComment() {
@@ -88,6 +88,11 @@ export default {
                 // console.log(this.newComment)
             })
         },
+
+    },
+    updated() {
+        this.getComment()
+        // console.log('w3tf')
 
     },
     created() {
